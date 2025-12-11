@@ -69,3 +69,20 @@ def decode_token(token: str) -> dict:
         return payload
     except JWTError:
         raise
+
+
+def decode_access_token(token: str) -> Optional[dict]:
+    """
+    Decode and verify a JWT access token
+    
+    Args:
+        token: JWT token string
+        
+    Returns:
+        Dictionary containing token payload or None if invalid
+    """
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload
+    except JWTError:
+        return None

@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.core.database import engine, Base
 
 # Import routers
-# from app.api import auth, accounts, transactions, financials, affordability, properties, admin
+from app.api import auth, accounts, transactions, financial
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -33,13 +33,10 @@ app.add_middleware(
 )
 
 # Include routers
-# app.include_router(auth.router, prefix=f"{settings.API_PREFIX}/auth", tags=["Authentication"])
-# app.include_router(accounts.router, prefix=f"{settings.API_PREFIX}/accounts", tags=["Accounts"])
-# app.include_router(transactions.router, prefix=f"{settings.API_PREFIX}/transactions", tags=["Transactions"])
-# app.include_router(financials.router, prefix=f"{settings.API_PREFIX}/financials", tags=["Financials"])
-# app.include_router(affordability.router, prefix=f"{settings.API_PREFIX}/affordability", tags=["Affordability"])
-# app.include_router(properties.router, prefix=f"{settings.API_PREFIX}/properties", tags=["Properties"])
-# app.include_router(admin.router, prefix=f"{settings.API_PREFIX}/admin", tags=["Admin"])
+app.include_router(auth.router, prefix=settings.API_PREFIX)
+app.include_router(accounts.router, prefix=settings.API_PREFIX)
+app.include_router(transactions.router, prefix=settings.API_PREFIX)
+app.include_router(financial.router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 async def root():

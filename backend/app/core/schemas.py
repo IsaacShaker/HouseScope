@@ -12,6 +12,12 @@ from decimal import Decimal
 # Authentication Schemas
 # ============================================================================
 
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+    full_name: Optional[str] = None
+
+
 class UserRegister(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
@@ -30,6 +36,7 @@ class Token(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: str
+    full_name: Optional[str] = None
     created_at: datetime
     
     class Config:
@@ -43,17 +50,29 @@ class UserResponse(BaseModel):
 class AccountBase(BaseModel):
     account_type: str
     institution_name: str
-    balance: Decimal
+    account_name: Optional[str] = None
+    balance: Decimal = Field(default=Decimal("0"))
+    credit_limit: Optional[Decimal] = None
+    interest_rate: Optional[float] = None
 
 
 class AccountCreate(AccountBase):
     plaid_account_id: Optional[str] = None
 
 
+class AccountUpdate(BaseModel):
+    account_type: Optional[str] = None
+    institution_name: Optional[str] = None
+    account_name: Optional[str] = None
+    balance: Optional[Decimal] = None
+    credit_limit: Optional[Decimal] = None
+    interest_rate: Optional[float] = None
+
+
 class AccountResponse(AccountBase):
     id: int
     user_id: int
-    last_synced: Optional[datetime]
+    last_synced: Optional[datetime] = None
     
     class Config:
         from_attributes = True
@@ -64,7 +83,7 @@ class AccountResponse(AccountBase):
 # ============================================================================
 
 class TransactionBase(BaseModel):
-    date: date
+    date: datetime
     amount: Decimal
     category: Optional[str] = None
     merchant: Optional[str] = None
@@ -73,6 +92,14 @@ class TransactionBase(BaseModel):
 
 class TransactionCreate(TransactionBase):
     account_id: int
+
+
+class TransactionUpdate(BaseModel):
+    date: Optional[datetime] = None
+    amount: Optional[Decimal] = None
+    category: Optional[str] = None
+    merchant: Optional[str] = None
+    description: Optional[str] = None
 
 
 class TransactionResponse(TransactionBase):
