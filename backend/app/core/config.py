@@ -36,8 +36,13 @@ class Settings(BaseSettings):
     PLAID_PRODUCTS: str = "transactions"
     
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
     CORS_ALLOW_CREDENTIALS: bool = True
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Convert CORS_ORIGINS string to list"""
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
     
     # Web Scraping
     SCRAPER_USER_AGENT: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
