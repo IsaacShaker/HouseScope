@@ -1,0 +1,16 @@
+date,amount,category,merchant,description
+2025-12-01,3500.00,salary,Employer,Monthly Salary
+2025-12-02,-1200.00,rent,Landlord,December Rent
+2025-12-03,-45.99,groceries,Whole Foods,Weekly Groceries
+2025-12-05,-65.00,utilities,Electric Company,Electricity Bill
+2025-12-06,-25.50,entertainment,Netflix,Subscription
+2025-12-07,-89.99,groceries,Giant Eagle,Groceries
+2025-12-10,-15.99,entertainment,Spotify,Music Subscription
+2025-12-12,-120.00,transport,Gas Station,Fuel
+2025-12-13,-42.50,dining,Restaurant,Dinner
+2025-12-15,3500.00,salary,Employer,Monthly Salary
+2025-12-16,-55.00,utilities,Internet Provider,Internet Bill
+2025-12-17,-75.25,groceries,Trader Joes,Weekly Groceries
+2025-12-18,-30.00,transport,Parking,Monthly Parking
+2025-12-20,-250.00,shopping,Target,Household Items
+2025-12-22,-40.00,dining,Coffee Shop,Meals
