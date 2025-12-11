@@ -3,6 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import financialService from '../services/financialService';
 import accountService from '../services/accountService';
+import {
+  ExpenseBreakdownChart,
+  IncomeExpensesChart,
+  NetWorthTrendChart,
+  FinancialHealthChart,
+} from '../components/Charts';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -233,32 +239,67 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Expense Breakdown */}
-            {dashboard.expense_breakdown && Object.keys(dashboard.expense_breakdown).length > 0 && (
-              <div className="bg-white shadow rounded-lg p-6 mb-8">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Expense Breakdown</h3>
-                <div className="space-y-3">
-                  {Object.entries(dashboard.expense_breakdown)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([category, amount]) => (
-                      <div key={category}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="font-medium text-gray-700 capitalize">{category}</span>
-                          <span className="text-gray-900">{formatCurrency(amount)}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-indigo-600 h-2 rounded-full"
-                            style={{
-                              width: `${(amount / dashboard.monthly_expenses) * 100}%`,
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
+            {/* Data Visualizations */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Income vs Expenses Chart */}
+              <div className="bg-white shadow rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Income vs Expenses</h3>
+                <div style={{ height: '300px' }}>
+                  <IncomeExpensesChart
+                    monthlyIncome={dashboard.monthly_income}
+                    monthlyExpenses={dashboard.monthly_expenses}
+                  />
                 </div>
               </div>
-            )}
+
+              {/* Financial Health Score */}
+              <div className="bg-white shadow rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Health Score</h3>
+                <FinancialHealthChart
+                  savingsRate={dashboard.savings_rate}
+                  dtiRatio={dashboard.dti_ratio}
+                  emergencyBuffer={dashboard.emergency_buffer_months}
+                />
+                <div className="mt-6 grid grid-cols-3 gap-2 text-center text-xs">
+                  <div>
+                    <div className="font-semibold text-gray-700">Savings Rate</div>
+                    <div className="text-gray-600">{dashboard.savings_rate.toFixed(1)}%</div>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-700">DTI Ratio</div>
+                    <div className="text-gray-600">{dashboard.dti_ratio.toFixed(1)}%</div>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-700">Emergency Buffer</div>
+                    <div className="text-gray-600">{dashboard.emergency_buffer_months.toFixed(1)}mo</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Net Worth Trend */}
+              <div className="bg-white shadow rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Net Worth Trend</h3>
+                <div style={{ height: '300px' }}>
+                  <NetWorthTrendChart
+                    netWorth={dashboard.net_worth}
+                    assets={dashboard.assets}
+                    liabilities={dashboard.liabilities}
+                  />
+                </div>
+              </div>
+
+              {/* Expense Breakdown Pie Chart */}
+              {dashboard.expense_breakdown && Object.keys(dashboard.expense_breakdown).length > 0 && (
+                <div className="bg-white shadow rounded-lg p-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Expense Distribution</h3>
+                  <div style={{ height: '300px' }}>
+                    <ExpenseBreakdownChart expenseBreakdown={dashboard.expense_breakdown} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+
 
             {/* Affordability Calculator CTA */}
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 shadow rounded-lg p-6 mb-6">

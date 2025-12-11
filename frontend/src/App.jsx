@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Accounts from './pages/Accounts'
 import Affordability from './pages/Affordability'
+import Transactions from './pages/Transactions'
 import ProtectedRoute from './components/ProtectedRoute'
 import authService from './services/authService'
 
@@ -52,25 +53,7 @@ function App() {
           path="/transactions"
           element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Transactions Page</h2>
-                  <p className="text-gray-600">Coming soon...</p>
-                </div>
-              </div>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/affordability"
-          element={
-            <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Affordability Calculator</h2>
-                  <p className="text-gray-600">Coming soon...</p>
-                </div>
-              </div>
+              <Transactions />
             </ProtectedRoute>
           }
         />
