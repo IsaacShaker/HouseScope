@@ -1,45 +1,81 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 
-// Import pages (to be created)
-// import Dashboard from './pages/Dashboard'
-// import FinanceDashboard from './pages/FinanceDashboard'
-// import Affordability from './pages/Affordability'
-// import Properties from './pages/Properties'
-// import Login from './pages/Login'
+// Import pages
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Accounts from './pages/Accounts'
+import Affordability from './pages/Affordability'
+import ProtectedRoute from './components/ProtectedRoute'
+import authService from './services/authService'
 
 function App() {
   return (
     <Router>
-      <div className="App">
-        <h1>HouseScope</h1>
-        <p>Welcome to HouseScope - Your Personal Finance & Real Estate Analysis Tool</p>
-        
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          {/* Add more routes as components are created */}
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-          {/* <Route path="/finance" element={<FinanceDashboard />} /> */}
-          {/* <Route path="/affordability" element={<Affordability />} /> */}
-          {/* <Route path="/properties" element={<Properties />} /> */}
-          {/* <Route path="/login" element={<Login />} /> */}
-        </Routes>
-      </div>
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            authService.isAuthenticated() ? 
+              <Navigate to="/dashboard" replace /> : 
+              <Navigate to="/login" replace />
+          } 
+        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts"
+          element={
+            <ProtectedRoute>
+              <Accounts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/affordability"
+          element={
+            <ProtectedRoute>
+              <Affordability />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Transactions Page</h2>
+                  <p className="text-gray-600">Coming soon...</p>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/affordability"
+          element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Affordability Calculator</h2>
+                  <p className="text-gray-600">Coming soon...</p>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </Router>
-  )
-}
-
-// Temporary homepage component
-function HomePage() {
-  return (
-    <div style={{ padding: '20px' }}>
-      <h2>Getting Started</h2>
-      <p>This is the HouseScope frontend. The application is under development.</p>
-      <ul>
-        <li>Backend API: http://localhost:8000</li>
-        <li>API Documentation: http://localhost:8000/docs</li>
-      </ul>
-    </div>
   )
 }
 

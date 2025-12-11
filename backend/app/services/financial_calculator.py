@@ -16,12 +16,10 @@ class FinancialCalculator:
     def __init__(self, db: Session):
         self.db = db
     
-    def calculate_net_worth(self, user_id: int) -> Decimal:
+    def calculate_assets_liabilities(self, user_id: int) -> tuple[Decimal, Decimal]:
         """
-        Calculate user's net worth (assets - liabilities)
-        
-        Assets: checking, savings accounts (positive balance)
-        Liabilities: credit cards, loans (negative balance or debt accounts)
+        Calculate user's assets and liabilities separately
+        Returns (assets, liabilities)
         """
         accounts = self.db.query(Account).filter(Account.user_id == user_id).all()
         
@@ -34,6 +32,16 @@ class FinancialCalculator:
             elif account.account_type in ["credit", "loan"]:
                 liabilities += abs(account.balance)
         
+        return assets, liabilities
+    
+    def calculate_net_worth(self, user_id: int) -> Decimal:
+        """
+        Calculate user's net worth (assets - liabilities)
+        
+        Assets: checking, savings accounts (positive balance)
+        Liabilities: credit cards, loans (negative balance or debt accounts)
+        """
+        assets, liabilities = self.calculate_assets_liabilities(user_id)
         return assets - liabilities
     
     def calculate_monthly_income(self, user_id: int, months: int = 3) -> Decimal:
@@ -153,6 +161,42 @@ class FinancialCalculator:
                 "category": row.category or "Uncategorized",
                 "amount": amount,
                 "percentage": float((amount / total_expenses) * 100)
+            })
+        
+        # Sort by amount descending
+        breakdown.sort(key=lambda x: x["amount"], reverse=True)
+        
+        return breakdown
+    
+    def get_income_breakdown(self, user_id: int, months: int = 3) -> List[Dict]:
+        """
+        Get income breakdown by category
+        Returns list of {category, amount, percentage}
+        """
+        start_date = datetime.now() - timedelta(days=months * 30)
+        
+        results = self.db.query(
+            Transaction.category,
+            func.sum(Transaction.amount).label("total")
+        ).join(Account).filter(
+            Account.user_id == user_id,
+            Transaction.date >= start_date.date(),
+            Transaction.amount > 0
+        ).group_by(Transaction.category).all()
+        
+        # Calculate total income
+        total_income = sum(row.total for row in results)
+        
+        if total_income == 0:
+            return []
+        
+        breakdown = []
+        for row in results:
+            amount = row.total
+            breakdown.append({
+                "category": row.category or "Uncategorized",
+                "amount": amount,
+                "percentage": float((amount / total_income) * 100)
             })
         
         # Sort by amount descending

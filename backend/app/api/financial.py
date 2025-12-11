@@ -4,6 +4,7 @@ Provides comprehensive financial analysis using FinancialCalculator and Affordab
 """
 from typing import Optional
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
@@ -53,45 +54,52 @@ def get_financial_dashboard(
             "message": "No accounts found. Add accounts to see financial metrics.",
         }
     
-    # Get transactions for the last 90 days
-    ninety_days_ago = datetime.now() - timedelta(days=90)
+    # Calculate metrics using FinancialCalculator
+    calculator = FinancialCalculator(db)
+    
+    assets, liabilities = calculator.calculate_assets_liabilities(current_user.id)
+    net_worth = calculator.calculate_net_worth(current_user.id)
+    monthly_income = calculator.calculate_monthly_income(current_user.id)
+    monthly_expenses = calculator.calculate_monthly_expenses(current_user.id)
+    
+    # Calculate derived metrics that need the base values
+    savings_rate = calculator.calculate_savings_rate(monthly_income, monthly_expenses)
+    emergency_buffer = calculator.calculate_emergency_buffer(current_user.id, monthly_expenses)
+    dti_ratio = calculator.calculate_dti_ratio(current_user.id, monthly_income)
+    
+    # Get category breakdown
+    expense_breakdown_list = calculator.get_expense_breakdown(current_user.id)
+    income_breakdown_list = calculator.get_income_breakdown(current_user.id)
+    
+    # Convert lists to dicts for frontend compatibility
+    expense_breakdown = {item["category"]: item["amount"] for item in expense_breakdown_list}
+    income_breakdown = {item["category"]: item["amount"] for item in income_breakdown_list}
+    
+    # Get transaction count
     account_ids = [acc.id for acc in accounts]
-    transactions = (
+    ninety_days_ago = datetime.now() - timedelta(days=90)
+    transaction_count = (
         db.query(Transaction)
         .filter(
             Transaction.account_id.in_(account_ids),
             Transaction.date >= ninety_days_ago,
         )
-        .all()
+        .count()
     )
-    
-    # Calculate metrics using FinancialCalculator
-    calculator = FinancialCalculator(accounts, transactions)
-    
-    net_worth = calculator.calculate_net_worth()
-    monthly_income = calculator.calculate_monthly_income()
-    monthly_expenses = calculator.calculate_monthly_expenses()
-    savings_rate = calculator.calculate_savings_rate()
-    emergency_buffer = calculator.calculate_emergency_buffer()
-    dti_ratio = calculator.calculate_dti_ratio()
-    
-    # Get category breakdown
-    expense_breakdown = calculator.get_expense_breakdown()
-    income_breakdown = calculator.get_income_breakdown()
     
     return {
         "net_worth": round(net_worth, 2),
-        "assets": round(calculator.total_assets, 2),
-        "liabilities": round(calculator.total_liabilities, 2),
+        "assets": round(assets, 2),
+        "liabilities": round(liabilities, 2),
         "monthly_income": round(monthly_income, 2),
         "monthly_expenses": round(monthly_expenses, 2),
-        "savings_rate": round(savings_rate * 100, 2),  # Return as percentage
+        "savings_rate": round(savings_rate, 2),  # Already as percentage
         "emergency_buffer_months": round(emergency_buffer, 1),
-        "dti_ratio": round(dti_ratio * 100, 2),  # Return as percentage
+        "dti_ratio": round(dti_ratio, 2),  # Already as percentage
         "expense_breakdown": {k: round(v, 2) for k, v in expense_breakdown.items()},
         "income_breakdown": {k: round(v, 2) for k, v in income_breakdown.items()},
         "account_count": len(accounts),
-        "transaction_count": len(transactions),
+        "transaction_count": transaction_count,
     }
 
 
@@ -126,71 +134,61 @@ def get_home_affordability(
             detail="No accounts found. Add accounts to calculate affordability.",
         )
     
-    # Get transactions for income/expense calculation
-    ninety_days_ago = datetime.now() - timedelta(days=90)
-    account_ids = [acc.id for acc in accounts]
-    transactions = (
-        db.query(Transaction)
-        .filter(
-            Transaction.account_id.in_(account_ids),
-            Transaction.date >= ninety_days_ago,
-        )
-        .all()
-    )
-    
     # Calculate financial metrics
-    calculator = FinancialCalculator(accounts, transactions)
-    monthly_income = calculator.calculate_monthly_income()
-    monthly_expenses = calculator.calculate_monthly_expenses()
-    available_cash = calculator.total_assets
+    calculator = FinancialCalculator(db)
+    monthly_income = calculator.calculate_monthly_income(current_user.id)
+    monthly_expenses = calculator.calculate_monthly_expenses(current_user.id)
+    assets, liabilities = calculator.calculate_assets_liabilities(current_user.id)
+    available_cash = assets
     
     # Get user's stored financial info (if exists)
     user_financial = db.query(UserFinancial).filter(UserFinancial.user_id == current_user.id).first()
-    existing_debt_payments = user_financial.monthly_debt_payment if user_financial else 0
+    existing_debt_payments = Decimal(str(user_financial.monthly_debt_payment)) if user_financial else Decimal("0")
     
-    # Calculate affordability using AffordabilityService
-    affordability_service = AffordabilityService()
+    # Use provided interest rate or default
+    interest_rate_decimal = interest_rate / 100 if interest_rate else None
     
-    max_price = affordability_service.calculate_max_home_price(
-        monthly_income=monthly_income,
-        monthly_debt_payments=existing_debt_payments,
-        down_payment_percent=down_payment_percent / 100,  # Convert to decimal
-        interest_rate=interest_rate / 100 if interest_rate else None,  # Convert to decimal
-        loan_term_years=loan_term_years,
-        property_tax_rate=property_tax_rate / 100 if property_tax_rate else None,
-        insurance_rate=insurance_rate / 100 if insurance_rate else None,
-        hoa_monthly=hoa_monthly,
+    # Calculate max monthly housing payment (28% DTI rule)
+    max_monthly_payment = AffordabilityService.calculate_max_monthly_payment(
+        monthly_income,
+        existing_debt_payments,
+        dti_limit=0.28
     )
     
-    # Calculate monthly payment breakdown
-    payment_breakdown = affordability_service.calculate_monthly_payment(
-        home_price=max_price,
-        down_payment_percent=down_payment_percent / 100,
-        interest_rate=interest_rate / 100 if interest_rate else None,
-        loan_term_years=loan_term_years,
-        property_tax_rate=property_tax_rate / 100 if property_tax_rate else None,
-        insurance_rate=insurance_rate / 100 if insurance_rate else None,
-        hoa_monthly=hoa_monthly,
+    # Add HOA to the calculation if provided
+    max_monthly_payment_for_mortgage = max_monthly_payment - Decimal(str(hoa_monthly or 0))
+    
+    # Calculate max home price
+    max_price = AffordabilityService.calculate_max_home_price(
+        max_monthly_payment_for_mortgage,
+        down_payment_percent / 100,  # Convert to decimal
+        interest_rate_decimal,
+        loan_term_years
     )
     
-    # Calculate safe price range (conservative estimate)
-    safe_max_price = affordability_service.calculate_safe_price_range(
-        monthly_income=monthly_income,
-        available_cash=available_cash,
-        monthly_expenses=monthly_expenses,
-        monthly_debt_payments=existing_debt_payments,
-        down_payment_percent=down_payment_percent / 100,
-        interest_rate=interest_rate / 100 if interest_rate else None,
+    # Calculate safe price (80% of max)
+    safe_max_price = max_price * Decimal("0.8")
+    
+    # Get payment breakdown for max price
+    payment_breakdown = AffordabilityService.calculate_monthly_payment_breakdown(
+        max_price,
+        down_payment_percent / 100,
+        interest_rate_decimal,
+        loan_term_years
     )
+    
+    # Add HOA to the breakdown
+    payment_breakdown["hoa"] = Decimal(str(hoa_monthly or 0))
+    payment_breakdown["total"] = payment_breakdown["total"] + payment_breakdown["hoa"]
     
     # Required down payment
-    down_payment_amount = max_price * (down_payment_percent / 100)
-    safe_down_payment = safe_max_price * (down_payment_percent / 100)
+    down_payment_amount = max_price * Decimal(str(down_payment_percent / 100))
+    safe_down_payment = safe_max_price * Decimal(str(down_payment_percent / 100))
     
     # Cash reserve requirements (6 months of expenses)
     required_reserves = monthly_expenses * 6
-    total_cash_needed = down_payment_amount + required_reserves
-    safe_cash_needed = safe_down_payment + required_reserves
+    closing_costs = max_price * Decimal("0.03")  # Estimate 3% closing costs
+    total_cash_needed = down_payment_amount + required_reserves + closing_costs
     
     # Warnings and recommendations
     warnings = []
@@ -204,48 +202,49 @@ def get_home_affordability(
         warnings.append(f"Insufficient cash reserves. Need ${total_cash_needed:,.2f}, have ${available_cash:,.2f}")
         recommendations.append("Build emergency fund before purchasing")
     
-    dti_ratio = calculator.calculate_dti_ratio()
-    if dti_ratio > 0.43:
-        warnings.append(f"DTI ratio ({dti_ratio*100:.1f}%) exceeds recommended 43%")
+    dti_ratio = calculator.calculate_dti_ratio(current_user.id, monthly_income)
+    if dti_ratio > 43:  # Already as percentage
+        warnings.append(f"DTI ratio ({dti_ratio:.1f}%) exceeds recommended 43%")
         recommendations.append("Reduce debt payments before purchasing")
     
-    if calculator.calculate_emergency_buffer() < 6:
-        warnings.append(f"Emergency fund covers only {calculator.calculate_emergency_buffer():.1f} months")
+    emergency_buffer = calculator.calculate_emergency_buffer(current_user.id, monthly_expenses)
+    if emergency_buffer < 6:
+        warnings.append(f"Emergency fund covers only {emergency_buffer:.1f} months")
         recommendations.append("Build 6+ months of emergency reserves")
     
     return {
-        "max_home_price": round(max_price, 2),
-        "safe_home_price": round(safe_max_price, 2),
+        "max_home_price": float(round(max_price, 2)),
+        "safe_home_price": float(round(safe_max_price, 2)),
         "recommended_range": {
-            "min": round(safe_max_price * 0.8, 2),
-            "max": round(safe_max_price, 2),
+            "min": float(round(safe_max_price * Decimal("0.8"), 2)),
+            "max": float(round(safe_max_price, 2)),
         },
         "down_payment": {
             "percent": down_payment_percent,
-            "amount": round(down_payment_amount, 2),
-            "safe_amount": round(safe_down_payment, 2),
+            "amount": float(round(down_payment_amount, 2)),
+            "safe_amount": float(round(safe_down_payment, 2)),
         },
         "monthly_payment": {
-            "total": round(payment_breakdown["total"], 2),
-            "principal_interest": round(payment_breakdown["principal_interest"], 2),
-            "property_tax": round(payment_breakdown["property_tax"], 2),
-            "insurance": round(payment_breakdown["insurance"], 2),
-            "pmi": round(payment_breakdown["pmi"], 2),
-            "hoa": round(payment_breakdown["hoa"], 2),
+            "total": float(round(payment_breakdown["total"], 2)),
+            "principal_interest": float(round(payment_breakdown["principal_interest"], 2)),
+            "property_tax": float(round(payment_breakdown["property_tax"], 2)),
+            "insurance": float(round(payment_breakdown["insurance"], 2)),
+            "pmi": float(round(payment_breakdown["pmi"], 2)),
+            "hoa": float(round(payment_breakdown["hoa"], 2)),
         },
         "cash_requirements": {
-            "down_payment": round(down_payment_amount, 2),
-            "closing_costs": round(max_price * 0.03, 2),  # Estimate 3%
-            "emergency_reserves": round(required_reserves, 2),
-            "total_needed": round(total_cash_needed + (max_price * 0.03), 2),
-            "available": round(available_cash, 2),
+            "down_payment": float(round(down_payment_amount, 2)),
+            "closing_costs": float(round(closing_costs, 2)),
+            "emergency_reserves": float(round(required_reserves, 2)),
+            "total_needed": float(round(total_cash_needed, 2)),
+            "available": float(round(available_cash, 2)),
         },
         "financial_health": {
-            "monthly_income": round(monthly_income, 2),
-            "monthly_expenses": round(monthly_expenses, 2),
-            "monthly_debt": round(existing_debt_payments, 2),
-            "dti_ratio": round(dti_ratio * 100, 2),
-            "emergency_buffer_months": round(calculator.calculate_emergency_buffer(), 1),
+            "monthly_income": float(round(monthly_income, 2)),
+            "monthly_expenses": float(round(monthly_expenses, 2)),
+            "monthly_debt": float(round(existing_debt_payments, 2)),
+            "dti_ratio": round(dti_ratio, 2),  # Already as percentage
+            "emergency_buffer_months": round(emergency_buffer, 1),
         },
         "warnings": warnings,
         "recommendations": recommendations,
