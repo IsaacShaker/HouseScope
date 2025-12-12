@@ -11,18 +11,15 @@ const Transactions = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  // Filters
   const [filterAccount, setFilterAccount] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
   
-  // CSV Upload
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState('');
   
-  // Add/Edit Transaction Modal
   const [showModal, setShowModal] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [formData, setFormData] = useState({
@@ -103,8 +100,7 @@ const Transactions = () => {
       return;
     }
 
-    // Ask user to select account for import
-    const accountId = accounts[0].id; // Use first account for now, can add selector later
+    const accountId = accounts[0].id;
 
     setUploading(true);
     setUploadError('');

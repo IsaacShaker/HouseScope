@@ -24,13 +24,11 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    // Validate password length
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters');
       return;

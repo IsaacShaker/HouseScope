@@ -82,7 +82,6 @@ export const ExpenseBreakdownChart = ({ expenseBreakdown }) => {
   return <Doughnut data={data} options={options} />;
 };
 
-// Income vs Expenses Bar Chart
 export const IncomeExpensesChart = ({ monthlyIncome, monthlyExpenses }) => {
   const data = {
     labels: ['This Month'],
@@ -187,12 +186,10 @@ export const NetWorthTrendChart = ({ netWorth, assets, liabilities }) => {
   return <Line data={data} options={options} />;
 };
 
-// Financial Health Gauge Chart
 export const FinancialHealthChart = ({ savingsRate, dtiRatio, emergencyBuffer }) => {
-  // Calculate overall health score (0-100)
-  const savingsScore = Math.min((savingsRate / 20) * 33, 33); // 20% savings = full marks
-  const dtiScore = Math.max(0, 33 - (dtiRatio / 43) * 33); // 0% DTI = full marks, 43% = 0
-  const bufferScore = Math.min((emergencyBuffer / 6) * 34, 34); // 6 months = full marks
+  const savingsScore = Math.min((savingsRate / 20) * 33, 33);
+  const dtiScore = Math.max(0, 33 - (dtiRatio / 43) * 33);
+  const bufferScore = Math.min((emergencyBuffer / 6) * 34, 34);
   
   const totalScore = savingsScore + dtiScore + bufferScore;
   

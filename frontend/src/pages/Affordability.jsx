@@ -10,7 +10,6 @@ const Affordability = () => {
   const [affordability, setAffordability] = useState(null);
   const [error, setError] = useState('');
   
-  // Form inputs
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
   const [interestRate, setInterestRate] = useState(5.8);
   const [loanTermYears, setLoanTermYears] = useState(30);

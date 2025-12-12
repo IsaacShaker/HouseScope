@@ -11,9 +11,8 @@ const authService = {
   },
 
   async login(email, password) {
-    // OAuth2 password flow requires form data
     const formData = new URLSearchParams();
-    formData.append('username', email); // OAuth2 uses 'username' field
+    formData.append('username', email);
     formData.append('password', password);
 
     const response = await api.post('/auth/login', formData, {
@@ -25,11 +24,9 @@ const authService = {
     const { access_token } = response.data;
     localStorage.setItem('token', access_token);
 
-    // Get user info
     const userResponse = await api.get('/auth/me');
     localStorage.setItem('user', JSON.stringify(userResponse.data));
     
-    // Dispatch custom event to notify components that user data has changed
     window.dispatchEvent(new Event('userUpdated'));
 
     return userResponse.data;

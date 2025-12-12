@@ -7,7 +7,6 @@ const Settings = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  // Add/Edit Category Modal
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryName, setCategoryName] = useState('');
