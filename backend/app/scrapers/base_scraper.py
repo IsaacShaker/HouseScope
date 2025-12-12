@@ -14,12 +14,7 @@ class BaseScraper(ABC):
     """Abstract base class for all property scrapers"""
     
     def __init__(self, rate_limit: float = 1.0):
-        """
-        Initialize scraper
-        
-        Args:
-            rate_limit: Minimum seconds between requests
-        """
+        """Initialize scraper"""
         self.rate_limit = rate_limit
         self.last_request_time = 0
     
@@ -45,32 +40,11 @@ class BaseScraper(ABC):
         min_baths: Optional[float] = None,
         property_type: Optional[str] = None
     ) -> List[Dict]:
-        """
-        Search for properties
-        
-        Args:
-            city: City name
-            state: State abbreviation
-            max_price: Maximum price filter
-            min_beds: Minimum bedrooms
-            min_baths: Minimum bathrooms
-            property_type: Type of property
-            
-        Returns:
-            List of property dictionaries
-        """
+        """Search for properties"""
         pass
     
     def _normalize_property(self, raw_data: Dict) -> Dict:
-        """
-        Normalize property data to standard format
-        
-        Args:
-            raw_data: Raw property data
-            
-        Returns:
-            Normalized property dictionary
-        """
+        """Normalize property data to standard format"""
         return {
             'source': self.get_source_name(),
             'address': raw_data.get('address', ''),

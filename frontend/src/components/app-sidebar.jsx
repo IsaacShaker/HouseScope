@@ -75,7 +75,6 @@ export function AppSidebar({
     };
   });
 
-  // Update user data when localStorage changes
   React.useEffect(() => {
     const handleStorageChange = () => {
       const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -88,7 +87,6 @@ export function AppSidebar({
 
     window.addEventListener('storage', handleStorageChange);
     
-    // Also listen for custom event when user logs in
     window.addEventListener('userUpdated', handleStorageChange);
     
     return () => {

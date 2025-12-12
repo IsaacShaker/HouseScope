@@ -16,7 +16,6 @@ function Properties() {
     { destination: '', max_commute_minutes: 30, mode: 'driving' }
   ]);
   
-  // Search filters
   const [filters, setFilters] = useState({
     city: 'Pittsburgh',
     state: 'PA',
@@ -35,17 +34,14 @@ function Properties() {
     try {
       const token = localStorage.getItem('token');
       
-      // First check if user has accounts
       const accountsResponse = await axios.get(`${API_URL}/api/accounts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       if (!accountsResponse.data || accountsResponse.data.length === 0) {
-        // No accounts, keep default max price
         return;
       }
       
-      // Use default parameters matching Affordability page
       const params = new URLSearchParams({
         down_payment_percent: '20',
         interest_rate: '5.8',
@@ -59,14 +55,12 @@ function Properties() {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Set max price to affordability max + 10%
       const maxAffordable = response.data.max_home_price;
       const maxPriceWithBuffer = Math.round(maxAffordable * 1.0);
       
       setFilters(prev => ({ ...prev, max_price: maxPriceWithBuffer }));
     } catch (err) {
       console.error('Failed to fetch affordability:', err);
-      // Keep default if affordability fetch fails
     }
   };
 
@@ -120,7 +114,6 @@ function Properties() {
       
       setScrapeResult(response.data);
       
-      // Refresh properties list after scraping
       setTimeout(() => {
         fetchProperties();
       }, 1000);
@@ -163,7 +156,6 @@ function Properties() {
       return;
     }
 
-    // Validate roommates
     const validRoommates = roommates.filter(rm => rm.destination.trim());
     if (validRoommates.length === 0) {
       setError('Please enter at least one destination address');
@@ -186,11 +178,9 @@ function Properties() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Update properties to show only compatible ones with commute details
       const compatibleIds = response.data.compatible_properties.map(p => p.property_id);
       const filtered = properties.filter(p => compatibleIds.includes(p.id));
       
-      // Add commute details to properties
       filtered.forEach(prop => {
         const commuteData = response.data.compatible_properties.find(cp => cp.property_id === prop.id);
         if (commuteData) {

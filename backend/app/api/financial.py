@@ -26,19 +26,7 @@ def get_financial_dashboard(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Get comprehensive financial dashboard data.
-    
-    Returns:
-    - Net worth (assets - liabilities)
-    - Monthly income
-    - Monthly expenses
-    - Savings rate
-    - Emergency fund buffer
-    - Debt-to-income ratio
-    - Cash flow trends
-    """
-    # Get user's accounts
+    """Get comprehensive financial dashboard data"""
     accounts = db.query(Account).filter(Account.user_id == current_user.id).all()
     
     if not accounts:
@@ -54,7 +42,6 @@ def get_financial_dashboard(
             "message": "No accounts found. Add accounts to see financial metrics.",
         }
     
-    # Calculate metrics using FinancialCalculator
     calculator = FinancialCalculator(db)
     
     assets, liabilities = calculator.calculate_assets_liabilities(current_user.id)
@@ -62,20 +49,15 @@ def get_financial_dashboard(
     monthly_income = calculator.calculate_monthly_income(current_user.id)
     monthly_expenses = calculator.calculate_monthly_expenses(current_user.id)
     
-    # Calculate derived metrics that need the base values
     savings_rate = calculator.calculate_savings_rate(monthly_income, monthly_expenses)
     emergency_buffer = calculator.calculate_emergency_buffer(current_user.id, monthly_expenses)
     dti_ratio = calculator.calculate_dti_ratio(current_user.id, monthly_income)
     
-    # Get category breakdown
     expense_breakdown_list = calculator.get_expense_breakdown(current_user.id)
     income_breakdown_list = calculator.get_income_breakdown(current_user.id)
     
-    # Convert lists to dicts for frontend compatibility
     expense_breakdown = {item["category"]: item["amount"] for item in expense_breakdown_list}
     income_breakdown = {item["category"]: item["amount"] for item in income_breakdown_list}
-    
-    # Get transaction count
     account_ids = [acc.id for acc in accounts]
     ninety_days_ago = datetime.now() - timedelta(days=90)
     transaction_count = (
@@ -114,18 +96,7 @@ def get_home_affordability(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Calculate home affordability based on current financial situation.
-    
-    Returns:
-    - Maximum affordable home price
-    - Recommended safe price range
-    - Required down payment
-    - Monthly payment breakdown (PITI + PMI)
-    - Cash reserve requirements
-    - Affordability warnings and recommendations
-    """
-    # Get user's financial data
+    """Calculate home affordability based on current financial situation"""
     accounts = db.query(Account).filter(Account.user_id == current_user.id).all()
     
     if not accounts:
@@ -134,50 +105,40 @@ def get_home_affordability(
             detail="No accounts found. Add accounts to calculate affordability.",
         )
     
-    # Calculate financial metrics
     calculator = FinancialCalculator(db)
     monthly_income = calculator.calculate_monthly_income(current_user.id)
     monthly_expenses = calculator.calculate_monthly_expenses(current_user.id)
     assets, liabilities = calculator.calculate_assets_liabilities(current_user.id)
     available_cash = assets
     
-    # Get user's stored financial info (if exists)
     user_financial = db.query(UserFinancial).filter(UserFinancial.user_id == current_user.id).first()
     existing_debt_payments = Decimal(str(user_financial.monthly_debt_payment)) if user_financial else Decimal("0")
     
-    # Use provided interest rate or default
     interest_rate_decimal = interest_rate / 100 if interest_rate else None
     
-    # Calculate max monthly housing payment (28% DTI rule)
     max_monthly_payment = AffordabilityService.calculate_max_monthly_payment(
         monthly_income,
         existing_debt_payments,
         dti_limit=0.28
     )
     
-    # Add HOA to the calculation if provided
     max_monthly_payment_for_mortgage = max_monthly_payment - Decimal(str(hoa_monthly or 0))
     
-    # Calculate max home price
     max_price = AffordabilityService.calculate_max_home_price(
         max_monthly_payment_for_mortgage,
-        down_payment_percent / 100,  # Convert to decimal
+        down_payment_percent / 100,
         interest_rate_decimal,
         loan_term_years
     )
     
-    # Calculate safe price (80% of max)
     safe_max_price = max_price * Decimal("0.8")
     
-    # Get payment breakdown for max price
     payment_breakdown = AffordabilityService.calculate_monthly_payment_breakdown(
         max_price,
         down_payment_percent / 100,
         interest_rate_decimal,
         loan_term_years
     )
-    
-    # Add HOA to the breakdown
     payment_breakdown["hoa"] = Decimal(str(hoa_monthly or 0))
     payment_breakdown["total"] = payment_breakdown["total"] + payment_breakdown["hoa"]
     
@@ -265,11 +226,9 @@ def update_financial_profile(
     user_financial = db.query(UserFinancial).filter(UserFinancial.user_id == current_user.id).first()
     
     if user_financial:
-        # Update existing
         user_financial.annual_income = annual_income
         user_financial.monthly_debt_payment = monthly_debt_payment
     else:
-        # Create new
         user_financial = UserFinancial(
             user_id=current_user.id,
             annual_income=annual_income,

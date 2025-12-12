@@ -225,7 +225,6 @@ def filter_properties_by_commute(
     try:
         commute_service = CommuteService()
         
-        # Get all requested properties
         properties = db.query(Property).filter(Property.id.in_(request.property_ids)).all()
         
         if not properties:
@@ -238,10 +237,8 @@ def filter_properties_by_commute(
         compatible_properties = []
         
         for prop in properties:
-            # Build full address
             property_address = f"{prop.address}, {prop.city}, {prop.state} {prop.zip_code}"
             
-            # Convert roommates to list of dicts
             roommates_data = [
                 {
                     "destination": rm.destination,
@@ -251,7 +248,6 @@ def filter_properties_by_commute(
                 for rm in request.roommates
             ]
             
-            # Check compatibility
             result = commute_service.check_property_commute_compatibility(
                 property_address=property_address,
                 roommates=roommates_data

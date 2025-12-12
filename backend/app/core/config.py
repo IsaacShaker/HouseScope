@@ -70,5 +70,4 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
-# Create global settings instance
 settings = Settings()

@@ -23,9 +23,6 @@ def seed_sample_data():
     db = SessionLocal()
     
     try:
-        print("Seeding sample data...")
-        
-        # Create sample user
         user = User(
             email="demo@housescope.com",
             hashed_password=hash_password("demo123"),
@@ -34,7 +31,6 @@ def seed_sample_data():
         )
         db.add(user)
         db.flush()
-        print(f"✓ Created user: {user.email}")
         
         # Create default categories
         default_categories = [
@@ -46,7 +42,6 @@ def seed_sample_data():
             Category(user_id=user.id, name=cat) for cat in default_categories
         ]
         db.add_all(categories_objs)
-        print(f"✓ Created {len(default_categories)} categories")
         
         # Create sample accounts
         # For a $350k house: needs ~$70k down payment (20%), good income/DTI
@@ -91,7 +86,6 @@ def seed_sample_data():
         
         db.add_all([checking, savings, investment, credit])
         db.flush()
-        print(f"✓ Created {4} accounts")
         
         # Create sample transactions
         # Annual income ~$95k to afford $350k house comfortably
@@ -244,7 +238,6 @@ def seed_sample_data():
                 transactions.append(trans)
         
         db.add_all(transactions)
-        print(f"✓ Created {len(transactions)} transactions")
         
         # Create sample properties
         properties = [
@@ -321,17 +314,14 @@ def seed_sample_data():
         ]
         
         db.add_all(properties)
-        print(f"✓ Created {len(properties)} sample properties")
         
         db.commit()
-        print("\n✅ Sample data seeded successfully!")
-        print("\nDemo User Credentials:")
-        print("  Email: demo@housescope.com")
-        print("  Password: demo123")
+        print("Sample data seeded successfully")
+        print("Demo credentials - Email: demo@housescope.com, Password: demo123")
         
     except Exception as e:
         db.rollback()
-        print(f"❌ Error seeding data: {e}")
+        print(f"Error seeding data: {e}")
     finally:
         db.close()
 

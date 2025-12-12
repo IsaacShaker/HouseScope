@@ -35,14 +35,12 @@ def get_transactions(
     Get transactions with optional filtering.
     Returns transactions ordered by date (most recent first).
     """
-    # Get user's account IDs for security
     user_account_ids = [
         acc.id for acc in db.query(Account).filter(Account.user_id == current_user.id).all()
     ]
     
     query = db.query(Transaction).filter(Transaction.account_id.in_(user_account_ids))
     
-    # Apply filters
     if account_id:
         if account_id not in user_account_ids:
             raise HTTPException(
@@ -74,7 +72,6 @@ def get_transaction(
     """
     Get a specific transaction by ID.
     """
-    # Get user's account IDs for security
     user_account_ids = [
         acc.id for acc in db.query(Account).filter(Account.user_id == current_user.id).all()
     ]
@@ -135,7 +132,6 @@ def create_transaction(
         description=transaction_data.description,
     )
     
-    # Update account balance
     account.balance += transaction_data.amount
     
     db.add(new_transaction)
@@ -155,7 +151,6 @@ def update_transaction(
     """
     Update an existing transaction.
     """
-    # Get user's account IDs for security
     user_account_ids = [
         acc.id for acc in db.query(Account).filter(Account.user_id == current_user.id).all()
     ]
@@ -175,16 +170,12 @@ def update_transaction(
             detail="Transaction not found",
         )
     
-    # Update account balance if amount changed
     if transaction_data.amount is not None and transaction_data.amount != transaction.amount:
         account = db.query(Account).filter(Account.id == transaction.account_id).first()
         balance_diff = transaction_data.amount - transaction.amount
         account.balance += balance_diff
     
-    # Update fields
     update_data = transaction_data.model_dump(exclude_unset=True)
-    
-    # Convert date string to date object if needed
     if 'date' in update_data and isinstance(update_data['date'], str):
         from datetime import datetime as dt
         update_data['date'] = dt.strptime(update_data['date'], '%Y-%m-%d').date()
@@ -207,7 +198,6 @@ def delete_transaction(
     """
     Delete a transaction.
     """
-    # Get user's account IDs for security
     user_account_ids = [
         acc.id for acc in db.query(Account).filter(Account.user_id == current_user.id).all()
     ]
@@ -227,7 +217,6 @@ def delete_transaction(
             detail="Transaction not found",
         )
     
-    # Update account balance
     account = db.query(Account).filter(Account.id == transaction.account_id).first()
     account.balance -= transaction.amount
     
@@ -268,7 +257,6 @@ def import_transactions_csv(
             detail="Account not found",
         )
     
-    # Check file type
     if not file.filename.endswith('.csv'):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -276,7 +264,6 @@ def import_transactions_csv(
         )
     
     try:
-        # Read CSV file
         contents = file.file.read()
         csv_data = io.StringIO(contents.decode('utf-8'))
         csv_reader = csv.DictReader(csv_data)
@@ -284,16 +271,14 @@ def import_transactions_csv(
         imported_count = 0
         errors = []
         
-        for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 (1 is header)
+        for row_num, row in enumerate(csv_reader, start=2):
             try:
-                # Parse date
                 date = datetime.strptime(row['date'].strip(), '%Y-%m-%d')
                 amount = float(row['amount'].strip())
                 category = row.get('category', 'uncategorized').strip()
                 merchant = row.get('merchant', '').strip() or None
                 description = row.get('description', '').strip() or None
                 
-                # Create transaction
                 transaction = Transaction(
                     account_id=account_id,
                     date=date,
@@ -304,8 +289,6 @@ def import_transactions_csv(
                 )
                 
                 db.add(transaction)
-                
-                # Update account balance
                 account.balance += amount
                 
                 imported_count += 1

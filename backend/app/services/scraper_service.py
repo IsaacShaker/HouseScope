@@ -30,21 +30,7 @@ class PropertyScraperService:
         min_baths: Optional[float] = None,
         property_type: Optional[str] = None
     ) -> dict:
-        """
-        Search for properties across sources and save to database
-        
-        Args:
-            city: City name
-            state: State abbreviation
-            sources: List of sources to scrape (default: all)
-            max_price: Maximum price filter
-            min_beds: Minimum bedrooms
-            min_baths: Minimum bathrooms
-            property_type: Type of property
-            
-        Returns:
-            Dictionary with results summary
-        """
+        """Search for properties across sources and save to database"""
         if sources is None:
             sources = list(self.scrapers.keys())
         
@@ -76,7 +62,6 @@ class PropertyScraperService:
                 saved_count = 0
                 for prop_data in properties:
                     try:
-                        # Check if property already exists
                         existing = self.db.query(Property).filter(
                             Property.address == prop_data['address'],
                             Property.city == prop_data['city'],
@@ -84,13 +69,11 @@ class PropertyScraperService:
                         ).first()
                         
                         if existing:
-                            # Update price if changed
                             if existing.price != prop_data['price']:
                                 existing.price = prop_data['price']
                                 existing.scraped_at = prop_data['scraped_at']
                                 logger.info(f"Updated price for {prop_data['address']}")
                         else:
-                            # Create new property
                             new_property = Property(**prop_data)
                             self.db.add(new_property)
                             saved_count += 1
@@ -131,22 +114,7 @@ class PropertyScraperService:
         limit: int = 100,
         offset: int = 0
     ) -> List[Property]:
-        """
-        Get properties from database with filters
-        
-        Args:
-            city: Filter by city
-            state: Filter by state
-            max_price: Maximum price
-            min_beds: Minimum bedrooms
-            min_baths: Minimum bathrooms
-            property_type: Type of property
-            limit: Number of results
-            offset: Pagination offset
-            
-        Returns:
-            List of Property objects
-        """
+        """Get properties from database with filters"""
         query = self.db.query(Property)
         
         if city:
@@ -162,7 +130,6 @@ class PropertyScraperService:
         if property_type:
             query = query.filter(Property.property_type == property_type.lower())
         
-        # Order by most recently scraped
         query = query.order_by(Property.scraped_at.desc())
         
         return query.offset(offset).limit(limit).all()
@@ -172,15 +139,7 @@ class PropertyScraperService:
         return self.db.query(Property).filter(Property.id == property_id).first()
     
     def delete_old_properties(self, days: int = 30) -> int:
-        """
-        Delete properties older than specified days
-        
-        Args:
-            days: Number of days (default 30)
-            
-        Returns:
-            Number of properties deleted
-        """
+        """Delete properties older than specified days"""
         from datetime import datetime, timedelta
         
         cutoff_date = datetime.utcnow() - timedelta(days=days)
