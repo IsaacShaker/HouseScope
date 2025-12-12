@@ -188,6 +188,7 @@ class PropertyBase(BaseModel):
 class PropertyCreate(PropertyBase):
     source: str = "manual"
     listing_url: Optional[str] = None
+    image_url: Optional[str] = None
     estimated_rent: Optional[Decimal] = None
 
 
@@ -195,6 +196,7 @@ class PropertyResponse(PropertyBase):
     id: int
     source: str
     listing_url: Optional[str]
+    image_url: Optional[str]
     scraped_at: datetime
     homebuyer_score: Optional[int]
     investor_score: Optional[int]

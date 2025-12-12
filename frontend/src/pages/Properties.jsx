@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, RefreshCw, Home, CheckCircle } from 'lucide-react';
+import { Search, RefreshCw, Home, CheckCircle, Plus, X, Users } from 'lucide-react';
 
 const API_URL = 'http://localhost:8000';
 
@@ -10,6 +10,11 @@ function Properties() {
   const [scraping, setScraping] = useState(false);
   const [error, setError] = useState('');
   const [scrapeResult, setScrapeResult] = useState(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [filteringCommute, setFilteringCommute] = useState(false);
+  const [roommates, setRoommates] = useState([
+    { destination: '', max_commute_minutes: 30, mode: 'driving' }
+  ]);
   
   // Search filters
   const [filters, setFilters] = useState({
@@ -22,8 +27,48 @@ function Properties() {
   });
 
   useEffect(() => {
+    fetchAffordability();
     fetchProperties();
   }, []);
+
+  const fetchAffordability = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // First check if user has accounts
+      const accountsResponse = await axios.get(`${API_URL}/api/accounts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (!accountsResponse.data || accountsResponse.data.length === 0) {
+        // No accounts, keep default max price
+        return;
+      }
+      
+      // Use default parameters matching Affordability page
+      const params = new URLSearchParams({
+        down_payment_percent: '20',
+        interest_rate: '5.8',
+        loan_term_years: '30',
+        property_tax_rate: '1.2',
+        insurance_rate: '0.5',
+        hoa_monthly: '0'
+      });
+      
+      const response = await axios.get(`${API_URL}/api/financial/affordability?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Set max price to affordability max + 10%
+      const maxAffordable = response.data.max_home_price;
+      const maxPriceWithBuffer = Math.round(maxAffordable * 1.0);
+      
+      setFilters(prev => ({ ...prev, max_price: maxPriceWithBuffer }));
+    } catch (err) {
+      console.error('Failed to fetch affordability:', err);
+      // Keep default if affordability fetch fails
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -94,6 +139,76 @@ function Properties() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const addRoommate = () => {
+    setRoommates([...roommates, { destination: '', max_commute_minutes: 30, mode: 'driving' }]);
+  };
+
+  const removeRoommate = (index) => {
+    if (roommates.length > 1) {
+      setRoommates(roommates.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateRoommate = (index, field, value) => {
+    const updated = [...roommates];
+    updated[index][field] = value;
+    setRoommates(updated);
+  };
+
+  const handleCommuteFilter = async () => {
+    if (properties.length === 0) {
+      setError('Please search for properties first before filtering by commute');
+      return;
+    }
+
+    // Validate roommates
+    const validRoommates = roommates.filter(rm => rm.destination.trim());
+    if (validRoommates.length === 0) {
+      setError('Please enter at least one destination address');
+      return;
+    }
+
+    try {
+      setFilteringCommute(true);
+      setError('');
+      const token = localStorage.getItem('token');
+
+      const propertyIds = properties.map(p => p.id);
+
+      const response = await axios.post(
+        `${API_URL}/api/properties/filter-by-commute`,
+        {
+          property_ids: propertyIds,
+          roommates: validRoommates
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update properties to show only compatible ones with commute details
+      const compatibleIds = response.data.compatible_properties.map(p => p.property_id);
+      const filtered = properties.filter(p => compatibleIds.includes(p.id));
+      
+      // Add commute details to properties
+      filtered.forEach(prop => {
+        const commuteData = response.data.compatible_properties.find(cp => cp.property_id === prop.id);
+        if (commuteData) {
+          prop.commute_details = commuteData.commute_details;
+        }
+      });
+
+      setProperties(filtered);
+      setScrapeResult({
+        message: response.data.message,
+        total_found: response.data.total_checked,
+        total_saved: response.data.total_compatible
+      });
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to filter properties by commute');
+    } finally {
+      setFilteringCommute(false);
+    }
   };
 
   return (
@@ -214,6 +329,112 @@ function Properties() {
         </div>
       </div>
 
+      {/* Advanced Search - Commute Filter */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-purple-600" />
+            <h2 className="text-xl font-semibold">Advanced Search: Commute Filter</h2>
+          </div>
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+          >
+            {showAdvanced ? 'Hide' : 'Show'} Advanced Search
+          </button>
+        </div>
+
+        {showAdvanced && (
+          <>
+            <p className="text-gray-600 text-sm mb-4">
+              Filter properties by commute time for multiple roommates. Each roommate can specify their work/school location and maximum acceptable commute time.
+            </p>
+
+            <div className="space-y-4 mb-4">
+              {roommates.map((roommate, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium text-gray-900">Roommate {index + 1}</h3>
+                    {roommates.length > 1 && (
+                      <button
+                        onClick={() => removeRoommate(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="md:col-span-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Work/School Address
+                      </label>
+                      <input
+                        type="text"
+                        value={roommate.destination}
+                        onChange={(e) => updateRoommate(index, 'destination', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        placeholder="123 Main St, Pittsburgh, PA"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Max Commute (minutes)
+                      </label>
+                      <input
+                        type="number"
+                        value={roommate.max_commute_minutes}
+                        onChange={(e) => updateRoommate(index, 'max_commute_minutes', parseFloat(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        min="5"
+                        max="180"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Transportation Mode
+                      </label>
+                      <select
+                        value={roommate.mode}
+                        onChange={(e) => updateRoommate(index, 'mode', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <option value="driving">Driving</option>
+                        <option value="transit">Public Transit</option>
+                        <option value="walking">Walking</option>
+                        <option value="bicycling">Bicycling</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={addRoommate}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors font-medium flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Roommate
+              </button>
+
+              <button
+                onClick={handleCommuteFilter}
+                disabled={filteringCommute || properties.length === 0}
+                className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+              >
+                <Search className="h-4 w-4" />
+                {filteringCommute ? 'Filtering...' : 'Filter by Commute'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
       {/* Scrape Results */}
       {scrapeResult && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
@@ -272,9 +493,17 @@ function Properties() {
               key={property.id}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
             >
-              {/* Property Image Placeholder */}
-              <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                <Home className="h-20 w-20 text-white opacity-80" />
+              {/* Property Image */}
+              <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden">
+                {property.image_url ? (
+                  <img 
+                    src={property.image_url} 
+                    alt={property.address}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Home className="h-20 w-20 text-white opacity-80" />
+                )}
               </div>
 
               {/* Property Details */}
@@ -340,6 +569,25 @@ function Properties() {
                           <span className="font-semibold">{property.investor_score}/100</span>
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Commute Details (if available) */}
+                {property.commute_details && property.commute_details.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <h4 className="text-xs font-semibold text-gray-700 mb-2">Commute Times:</h4>
+                    <div className="space-y-1">
+                      {property.commute_details.map((commute, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-xs">
+                          <span className="text-gray-600">
+                            Roommate {commute.roommate_index} ({commute.mode}):
+                          </span>
+                          <span className={`font-semibold ${commute.compatible ? 'text-green-600' : 'text-red-600'}`}>
+                            {commute.duration_text}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

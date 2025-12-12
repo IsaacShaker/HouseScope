@@ -23,6 +23,7 @@ class Property(Base):
     year_built = Column(Integer, nullable=True)
     property_type = Column(String, nullable=False)  # house, condo, townhouse
     listing_url = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
     scraped_at = Column(DateTime, default=datetime.utcnow)
     homebuyer_score = Column(Integer, nullable=True, index=True)
     investor_score = Column(Integer, nullable=True, index=True)

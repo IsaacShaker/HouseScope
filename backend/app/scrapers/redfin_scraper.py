@@ -161,8 +161,8 @@ class RedfinScraper(BaseScraper):
             self.property_types = property_types
             
             # Scrape the first page only (to avoid long-running scrapes)
-            logger.info("Scraping first page of Redfin results...")
-            listings = self.scrape(pages="1")
+            logger.info("Scraping first 3 pages of Redfin results...")
+            listings = self.scrape(pages="3")
             
             # Convert to our standard format
             properties = []
@@ -250,6 +250,9 @@ class RedfinScraper(BaseScraper):
             # Listing URL
             listing_url = listing.get('url', '')
             
+            # Image URL
+            image_url = listing.get('image_url', '')
+            
             # Determine property type from URL or default to house
             prop_type = 'house'
             if listing_url:
@@ -268,7 +271,8 @@ class RedfinScraper(BaseScraper):
                 'baths': baths,
                 'sqft': sqft,
                 'property_type': prop_type,
-                'listing_url': listing_url
+                'listing_url': listing_url,
+                'image_url': image_url
             }
             
             return self._normalize_property(raw_data)
@@ -477,6 +481,13 @@ class RedfinScraper(BaseScraper):
                 except Exception:
                     pass
 
+                image_url = ""
+                try:
+                    img_el = card.find_element(By.CSS_SELECTOR, "img.bp-Homecard__Photo--image")
+                    image_url = img_el.get_attribute("src") or ""
+                except Exception:
+                    pass
+
                 if not (price or address):
                     continue
 
@@ -488,6 +499,7 @@ class RedfinScraper(BaseScraper):
                         "baths": baths,
                         "area": area,
                         "url": url,
+                        "image_url": image_url,
                     }
                 )
 

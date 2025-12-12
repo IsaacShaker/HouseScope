@@ -8,6 +8,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from app.core.database import get_db
 from app.services.scraper_service import PropertyScraperService
+from app.services.commute_service import CommuteService
 from app.models.property import Property
 import logging
 
@@ -55,6 +56,7 @@ class PropertyResponse(BaseModel):
     year_built: Optional[int]
     property_type: str
     listing_url: Optional[str]
+    image_url: Optional[str]
     homebuyer_score: Optional[int]
     investor_score: Optional[int]
     estimated_rent: Optional[float]
@@ -69,6 +71,19 @@ class ScrapeResultResponse(BaseModel):
     total_found: int
     total_saved: int
     by_source: dict
+
+
+class RoommateCommute(BaseModel):
+    """Roommate commute requirements"""
+    destination: str = Field(..., description="Work/school address")
+    max_commute_minutes: float = Field(..., ge=0, le=180, description="Maximum commute time in minutes")
+    mode: str = Field("driving", description="Transportation mode: driving, transit, walking, bicycling")
+
+
+class CommuteFilterRequest(BaseModel):
+    """Request to filter properties by commute times"""
+    property_ids: List[int] = Field(..., description="List of property IDs to check")
+    roommates: List[RoommateCommute] = Field(..., min_items=1, description="Roommate commute requirements")
 
 
 @router.post("/scrape", response_model=ScrapeResultResponse)
@@ -192,3 +207,75 @@ def cleanup_old_properties(days: int = 30, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error during cleanup: {e}")
         raise HTTPException(status_code=500, detail=f"Cleanup failed: {str(e)}")
+
+
+@router.post("/filter-by-commute")
+def filter_properties_by_commute(
+    request: CommuteFilterRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Filter properties based on commute time requirements for multiple roommates
+    
+    This endpoint checks each property against all roommate commute requirements
+    and returns only properties that satisfy all requirements.
+    
+    Uses free OpenStreetMap and OSRM APIs - no API key required!
+    """
+    try:
+        commute_service = CommuteService()
+        
+        # Get all requested properties
+        properties = db.query(Property).filter(Property.id.in_(request.property_ids)).all()
+        
+        if not properties:
+            return {
+                "compatible_properties": [],
+                "total_checked": 0,
+                "total_compatible": 0
+            }
+        
+        compatible_properties = []
+        
+        for prop in properties:
+            # Build full address
+            property_address = f"{prop.address}, {prop.city}, {prop.state} {prop.zip_code}"
+            
+            # Convert roommates to list of dicts
+            roommates_data = [
+                {
+                    "destination": rm.destination,
+                    "max_commute_minutes": rm.max_commute_minutes,
+                    "mode": rm.mode
+                }
+                for rm in request.roommates
+            ]
+            
+            # Check compatibility
+            result = commute_service.check_property_commute_compatibility(
+                property_address=property_address,
+                roommates=roommates_data
+            )
+            
+            if result["compatible"]:
+                compatible_properties.append({
+                    "property_id": prop.id,
+                    "address": prop.address,
+                    "city": prop.city,
+                    "state": prop.state,
+                    "price": float(prop.price),
+                    "commute_details": result["commute_details"]
+                })
+        
+        return {
+            "compatible_properties": compatible_properties,
+            "total_checked": len(properties),
+            "total_compatible": len(compatible_properties),
+            "message": f"Found {len(compatible_properties)} properties compatible with all roommate commute requirements"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error filtering by commute: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to filter by commute: {str(e)}")

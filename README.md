@@ -50,6 +50,12 @@ HouseScope consists of three integrated components:
   - Appreciation potential
 - 🎨 Visual property cards with scores
 - 🔎 Advanced filtering and sorting
+- 🚗 **Commute Time Filter**: Filter properties by commute requirements
+  - Support for multiple roommates
+  - Different destinations for each person
+  - Multiple transportation modes (driving, walking, bicycling, transit)
+  - Uses free OpenStreetMap & OSRM APIs (no API key required!)
+  - Display commute times on property cards
 
 ---
 
@@ -153,11 +159,17 @@ pip install -r requirements-dev.txt
 cp ../.env.example .env
 
 # Edit .env and add your configuration
-# At minimum, set SECRET_KEY and Plaid credentials
+# Required: SECRET_KEY
+# Optional: PLAID_CLIENT_ID, PLAID_SECRET
 
 # Initialize database
 python -c "from app.core.database import Base, engine; Base.metadata.create_all(bind=engine)"
 ```
+
+**Environment Variables:**
+- `SECRET_KEY`: Required for JWT authentication
+- `PLAID_CLIENT_ID` & `PLAID_SECRET`: Optional, for bank account integration
+
 
 #### 3. Frontend Setup
 

@@ -1,11 +1,4 @@
 #!/bin/bash
-"""
-Reset and reseed the database
-This script will:
-1. Delete the existing database
-2. Create fresh tables with the current schema
-3. Seed with sample data
-"""
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

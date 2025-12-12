@@ -84,4 +84,5 @@ class BaseScraper(ABC):
             'year_built': raw_data.get('year_built'),
             'property_type': raw_data.get('property_type', 'house'),
             'listing_url': raw_data.get('listing_url', ''),
+            'image_url': raw_data.get('image_url', ''),
         }
