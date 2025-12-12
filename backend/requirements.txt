@@ -23,6 +23,9 @@ beautifulsoup4==4.12.2
 selectolax==0.3.17
 requests==2.31.0
 lxml==4.9.3
+selenium==4.16.0
+undetected-chromedriver==3.5.5
+webdriver-manager==4.0.1
 
 # Data Processing
 pandas==2.1.3
