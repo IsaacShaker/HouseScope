@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import transactionService from '../services/transactionService';
 import accountService from '../services/accountService';
-import { Upload } from 'lucide-react';
+import { Upload, Pencil, Trash2 } from 'lucide-react';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -405,18 +405,22 @@ const Transactions = () => {
                         {formatCurrency(transaction.amount)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEditTransaction(transaction)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-4"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTransaction(transaction.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleEditTransaction(transaction)}
+                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
+                            title="Edit transaction"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTransaction(transaction.id)}
+                            className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors"
+                            title="Delete transaction"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
