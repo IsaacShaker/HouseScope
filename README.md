@@ -105,16 +105,9 @@ HouseScope/
 │   │   └── services/      # API services
 │   └── package.json       # Node dependencies
 │
-├── docs/                  # Documentation
-│   ├── DEVELOPMENT_PLAN.md
-│   ├── ARCHITECTURE.md
-│   └── STRUCTURE.md
-│
 ├── scripts/               # Utility scripts
 └── data/                  # Local data storage
 ```
-
-See [`docs/STRUCTURE.md`](docs/STRUCTURE.md) for detailed repository structure.
 
 ---
 
@@ -210,14 +203,6 @@ The frontend will be available at http://localhost:5173
 
 ---
 
-## 📚 Documentation
-
-- **[Development Plan](DEVELOPMENT_PLAN.md)**: Comprehensive project plan, phases, algorithms
-- **[Architecture](docs/ARCHITECTURE.md)**: System architecture, components, data flows
-- **[Structure](docs/STRUCTURE.md)**: Repository structure and directory explanations
-
----
-
 ## 🔑 Configuration
 
 ### Environment Variables
@@ -273,8 +258,6 @@ Key models:
 - **Property**: Real estate listings
 - **UserFinancial**: Calculated financial snapshots
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for detailed schema.
-
 ---
 
 ## 📊 API Endpoints
@@ -305,38 +288,22 @@ Full API documentation: http://localhost:8000/docs (when server is running)
 
 ### Phase 1: Foundation ✅ (Weeks 1-2)
 - [x] Repository structure
-- [x] Backend setup
-- [x] Database models
-- [x] Configuration management
+### Completed Features
+- Repository structure and setup
+- User authentication and authorization
+- Financial dashboard with net worth tracking
+- Transaction management and categorization
+- Affordability calculator
+- Property scraping (Redfin)
+- Commute time analysis
+- Interactive data visualizations
 
-### Phase 2: Finance Dashboard (Weeks 3-4)
-- [ ] Plaid integration
-- [ ] Financial calculations
-- [ ] Dashboard UI
-- [ ] CSV import
-
-### Phase 3: Affordability Engine (Weeks 5-6)
-- [ ] Affordability algorithms
-- [ ] Calculator UI
-- [ ] Scenario testing
-
-### Phase 4: Property Scraping (Weeks 7-8)
-- [ ] Web scraper framework
-- [ ] Site-specific scrapers
-- [ ] Scraper scheduling
-
-### Phase 5: Deal Scoring (Weeks 9-10)
-- [ ] HomeBuyerScore algorithm
-- [ ] InvestorScore algorithm
-- [ ] Property ranking
-
-### Phase 6: Integration & Polish (Weeks 11-12)
-- [ ] End-to-end integration
-- [ ] Testing
-- [ ] Documentation
-- [ ] Deployment preparation
-
----
+### Future Enhancements
+- Plaid API integration for automatic bank sync
+- Additional property data sources
+- Mobile responsive design improvements
+- Advanced property filtering options
+- Historical data tracking and trends
 
 ## 🤝 Contributing
 
