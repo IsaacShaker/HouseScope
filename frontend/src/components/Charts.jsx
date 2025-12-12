@@ -12,7 +12,6 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,7 +24,6 @@ ChartJS.register(
   Legend
 );
 
-// Expense Breakdown Doughnut Chart
 export const ExpenseBreakdownChart = ({ expenseBreakdown }) => {
   const data = {
     labels: Object.keys(expenseBreakdown).map(
@@ -135,7 +133,6 @@ export const IncomeExpensesChart = ({ monthlyIncome, monthlyExpenses }) => {
   return <Bar data={data} options={options} />;
 };
 
-// Net Worth Trend Chart (placeholder for now - would need historical data)
 export const NetWorthTrendChart = ({ netWorth, assets, liabilities }) => {
   const data = {
     labels: ['Previous', 'Current'],

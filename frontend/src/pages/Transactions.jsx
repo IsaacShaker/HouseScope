@@ -52,7 +52,6 @@ const Transactions = () => {
       setCategories(data.categories || []);
     } catch (err) {
       console.error('Failed to fetch categories:', err);
-      // Fallback to default categories if API fails
       setCategories(['income', 'food', 'housing', 'transportation', 'utilities', 'healthcare', 'entertainment', 'other']);
     }
   };

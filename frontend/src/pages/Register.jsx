@@ -38,7 +38,6 @@ const Register = () => {
 
     try {
       await authService.register(formData.email, formData.password, formData.fullName);
-      // Auto-login after registration
       await authService.login(formData.email, formData.password);
       navigate('/dashboard');
     } catch (err) {

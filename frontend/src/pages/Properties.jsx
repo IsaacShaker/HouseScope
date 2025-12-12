@@ -34,7 +34,6 @@ function Properties() {
     try {
       const token = localStorage.getItem('token');
       
-      // First check if user has accounts
       const accountsResponse = await axios.get(`${API_URL}/api/accounts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -115,7 +114,6 @@ function Properties() {
       
       setScrapeResult(response.data);
       
-      // Refresh properties list after scraping
       setTimeout(() => {
         fetchProperties();
       }, 1000);
@@ -158,7 +156,6 @@ function Properties() {
       return;
     }
 
-    // Validate roommates
     const validRoommates = roommates.filter(rm => rm.destination.trim());
     if (validRoommates.length === 0) {
       setError('Please enter at least one destination address');
