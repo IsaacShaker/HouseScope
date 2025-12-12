@@ -93,20 +93,10 @@ class RedfinScraper(BaseScraper):
     
     @classmethod
     def _get_location_path(cls, city: str, state: str) -> str:
-        """
-        Get the Redfin location path for a city/state
-        
-        Args:
-            city: City name
-            state: State abbreviation
-            
-        Returns:
-            Redfin location path string
-        """
+        """Get the Redfin location path for a city/state"""
         # Normalize city name
         city_key = f"{city.lower().replace(' ', '-')}_{state.lower()}"
         
-        # Check if we have a predefined path
         if city_key in cls.LOCATION_MAP:
             return cls.LOCATION_MAP[city_key]
         
@@ -123,20 +113,7 @@ class RedfinScraper(BaseScraper):
         min_baths: Optional[float] = None,
         property_type: Optional[str] = None
     ) -> List[Dict]:
-        """
-        Search for properties on Redfin (implements BaseScraper interface)
-        
-        Args:
-            city: City name
-            state: State abbreviation
-            max_price: Maximum price
-            min_beds: Minimum bedrooms
-            min_baths: Minimum bathrooms
-            property_type: Type of property
-            
-        Returns:
-            List of normalized property dictionaries
-        """
+        """Search for properties on Redfin"""
         logger.info(f"Scraping Redfin for properties in {city}, {state}")
         
         try:
@@ -183,17 +160,7 @@ class RedfinScraper(BaseScraper):
             return []
     
     def _convert_redfin_listing(self, listing: Dict, city: str, state: str) -> Optional[Dict]:
-        """
-        Convert a Redfin listing to our standard format
-        
-        Args:
-            listing: Raw Redfin listing dict
-            city: City name
-            state: State abbreviation
-            
-        Returns:
-            Normalized property dict or None
-        """
+        """Convert a Redfin listing to our standard format"""
         try:
             # Parse price
             price_str = listing.get('price', '').replace('$', '').replace(',', '').strip()
@@ -298,7 +265,6 @@ class RedfinScraper(BaseScraper):
             options.add_argument("-headless")
 
         firefox_bin = which("firefox")
-        print("Using firefox binary:", firefox_bin)
         if firefox_bin:
             options.binary_location = firefox_bin
 
@@ -314,7 +280,6 @@ class RedfinScraper(BaseScraper):
         )
 
         gecko_path = GeckoDriverManager().install()
-        print("Using geckodriver:", gecko_path)
         service = FirefoxService(executable_path=gecko_path)
 
         driver = webdriver.Firefox(service=service, options=options)
@@ -325,23 +290,13 @@ class RedfinScraper(BaseScraper):
 
     @staticmethod
     def _format_price(value: int) -> str:
-        """
-        Convert numeric price to Redfin format.
-        Example: 100000 -> "100k"
-        """
+        """Convert numeric price to Redfin format"""
         if value >= 1000 and value % 1000 == 0:
             return f"{value // 1000}k"
         return str(value)
 
     def build_base_url(self) -> str:
-        """
-        Build the base Redfin URL including /filter/... if filters are set.
-
-        Example:
-          https://www.redfin.com/city/15702/PA/Pittsburgh/filter/
-            property-type=house+multifamily,min-price=100k,max-price=400k,
-            min-beds=3,max-beds=4,min-baths=1.5
-        """
+        """Build the base Redfin URL including filters"""
         base = f"https://www.redfin.com/{self.location_path}"
         filter_parts: List[str] = []
 
@@ -553,10 +508,7 @@ class RedfinScraper(BaseScraper):
     # ---------- Redfin "Download All" CSV helpers ----------
 
     def _wait_for_csv(self, timeout: int = 60) -> Optional[str]:
-        """
-        Wait up to `timeout` seconds for a CSV file to appear in self.download_dir.
-        Returns the latest CSV file path, or None if nothing shows up.
-        """
+        """Wait for a CSV file to appear in the download directory"""
         download_dir = self.download_dir
         end = time.time() + timeout
 
@@ -571,18 +523,14 @@ class RedfinScraper(BaseScraper):
                     reverse=True,
                 )
                 latest = os.path.join(download_dir, csv_files[0])
-                print(f"[+] Detected CSV download: {latest}")
                 return latest
 
             time.sleep(1)
 
-        print("[!] Timed out waiting for CSV download")
         return None
 
     def _parse_download_row(self, row: Dict[str, str]) -> Dict:
-        """
-        Convert a single row from Redfin's 'Download All' CSV into our internal format.
-        """
+        """Convert a Redfin CSV row into our internal format"""
         if "In accordance with local MLS rules" in row.get("SALE TYPE", ""):
             return {}
 
@@ -641,9 +589,7 @@ class RedfinScraper(BaseScraper):
         }
 
     def load_download_csv(self, path: str) -> List[Dict]:
-        """
-        Load listings from a Redfin 'Download All' CSV export.
-        """
+        """Load listings from a Redfin CSV export"""
         listings: List[Dict] = []
         with open(path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -652,27 +598,16 @@ class RedfinScraper(BaseScraper):
                 if parsed:
                     listings.append(parsed)
 
-        print(f"[+] Loaded {len(listings)} listings from downloaded CSV: {path}")
         return listings
 
     def download_and_load_csv(self) -> List[Dict]:
-        """
-        Use Selenium to:
-          - open the Redfin URL with filters,
-          - let the user log in (if needed),
-          - click 'Download All',
-          - wait for the CSV to be saved,
-          - parse that CSV and return listings.
-        """
+        """Open Redfin, download CSV, and parse listings"""
         driver = self.create_driver()
         base_url = self.build_base_url()
-        print(f"[+] Built URL: {base_url}")
 
         try:
-            print(f"[+] Opening {base_url}")
             driver.get(base_url)
 
-            # Try to wait for listings or just move on to the download section
             try:
                 WebDriverWait(driver, 60).until(
                     EC.presence_of_all_elements_located(
@@ -680,11 +615,9 @@ class RedfinScraper(BaseScraper):
                     )
                 )
             except TimeoutException:
-                print("[!] Timed out waiting for listing cards; continuing to Download All button")
+                pass
 
-            print("\n[!] If you are not logged into Redfin, do so now in the Firefox window.")
-            print("    Also adjust any filters as needed.")
-            input("    When you see the '(Download All)' link, press ENTER here to click it... ")
+            input("Press ENTER when ready to download CSV... ")
 
             # Locate and click the Download All link
             try:
@@ -703,11 +636,9 @@ class RedfinScraper(BaseScraper):
             driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", download_span)
             time.sleep(0.5)
             driver.execute_script("arguments[0].click();", download_span)
-            print("[+] Clicked '(Download All)'")
 
             csv_path = self._wait_for_csv(timeout=60)
             if not csv_path:
-                print("[!] No CSV detected after clicking Download All")
                 return []
 
             listings = self.load_download_csv(csv_path)
@@ -719,19 +650,13 @@ class RedfinScraper(BaseScraper):
     # ---------- Main scraping (card-based) ----------
 
     def scrape(self, pages: str = "1") -> List[Dict]:
-        """
-        Scrape listings from Redfin cards for this configuration.
-
-        pages: "N" or "max"
-        """
+        """Scrape listings from Redfin"""
         driver = self.create_driver()
         all_listings: List[Dict] = []
 
         base_url = self.build_base_url()
-        print(f"[+] Built URL: {base_url}")
 
         try:
-            print(f"[+] Opening {base_url}")
             driver.get(base_url)
 
             WebDriverWait(driver, 60).until(
@@ -741,7 +666,6 @@ class RedfinScraper(BaseScraper):
             )
 
             max_pages_available = self._get_max_pages(driver)
-            print(f"[+] Detected {max_pages_available} total pages")
 
             if pages == "max":
                 total_pages = max_pages_available
@@ -750,18 +674,15 @@ class RedfinScraper(BaseScraper):
                 total_pages = min(requested, max_pages_available)
 
             for page_num in range(1, total_pages + 1):
-                print(f"[+] Scraping page {page_num}")
                 self._scroll_to_bottom(driver)
 
                 page_listings = self._parse_listing_cards(driver)
-                print(f"    Found {len(page_listings)} listings on this page")
 
                 all_listings.extend(page_listings)
 
                 if page_num < total_pages:
                     has_next = self._go_to_next_page(driver)
                     if not has_next:
-                        print("[!] No more pages. Stopping.")
                         break
 
                     WebDriverWait(driver, 60).until(
@@ -779,14 +700,11 @@ class RedfinScraper(BaseScraper):
 
     def save_to_csv(self, listings: List[Dict]):
         if not listings:
-            print("[!] No listings to save.")
             return
 
-        # Combine keys across all listings (handles extra fields from download CSV)
         all_keys = set()
         for row in listings:
             all_keys.update(row.keys())
-        # Put the common keys first
         preferred_order = ["price", "address", "beds", "baths", "area", "url", "lat", "lng"]
         fieldnames = [k for k in preferred_order if k in all_keys] + [
             k for k in sorted(all_keys) if k not in preferred_order
@@ -799,5 +717,3 @@ class RedfinScraper(BaseScraper):
             writer.writeheader()
             for row in listings:
                 writer.writerow(row)
-
-        print(f"[+] Saved {len(listings)} listings to {self.csv_filename}")

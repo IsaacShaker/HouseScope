@@ -16,14 +16,8 @@ from app.models import User, Account, Transaction, Property, UserFinancial
 
 def init_database():
     """Initialize database tables"""
-    print("Creating database tables...")
     Base.metadata.create_all(bind=engine)
-    print("✓ Database tables created successfully!")
-    print(f"  - users")
-    print(f"  - accounts")
-    print(f"  - transactions")
-    print(f"  - properties")
-    print(f"  - user_financials")
+    print("Database tables created")
 
 if __name__ == "__main__":
     init_database()

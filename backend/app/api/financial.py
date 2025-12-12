@@ -26,19 +26,7 @@ def get_financial_dashboard(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Get comprehensive financial dashboard data.
-    
-    Returns:
-    - Net worth (assets - liabilities)
-    - Monthly income
-    - Monthly expenses
-    - Savings rate
-    - Emergency fund buffer
-    - Debt-to-income ratio
-    - Cash flow trends
-    """
-    # Get user's accounts
+    """Get comprehensive financial dashboard data"""
     accounts = db.query(Account).filter(Account.user_id == current_user.id).all()
     
     if not accounts:
@@ -54,7 +42,6 @@ def get_financial_dashboard(
             "message": "No accounts found. Add accounts to see financial metrics.",
         }
     
-    # Calculate metrics using FinancialCalculator
     calculator = FinancialCalculator(db)
     
     assets, liabilities = calculator.calculate_assets_liabilities(current_user.id)
@@ -62,20 +49,15 @@ def get_financial_dashboard(
     monthly_income = calculator.calculate_monthly_income(current_user.id)
     monthly_expenses = calculator.calculate_monthly_expenses(current_user.id)
     
-    # Calculate derived metrics that need the base values
     savings_rate = calculator.calculate_savings_rate(monthly_income, monthly_expenses)
     emergency_buffer = calculator.calculate_emergency_buffer(current_user.id, monthly_expenses)
     dti_ratio = calculator.calculate_dti_ratio(current_user.id, monthly_income)
     
-    # Get category breakdown
     expense_breakdown_list = calculator.get_expense_breakdown(current_user.id)
     income_breakdown_list = calculator.get_income_breakdown(current_user.id)
     
-    # Convert lists to dicts for frontend compatibility
     expense_breakdown = {item["category"]: item["amount"] for item in expense_breakdown_list}
     income_breakdown = {item["category"]: item["amount"] for item in income_breakdown_list}
-    
-    # Get transaction count
     account_ids = [acc.id for acc in accounts]
     ninety_days_ago = datetime.now() - timedelta(days=90)
     transaction_count = (
@@ -114,17 +96,7 @@ def get_home_affordability(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Calculate home affordability based on current financial situation.
-    
-    Returns:
-    - Maximum affordable home price
-    - Recommended safe price range
-    - Required down payment
-    - Monthly payment breakdown (PITI + PMI)
-    - Cash reserve requirements
-    - Affordability warnings and recommendations
-    """
+    """Calculate home affordability based on current financial situation"""
     # Get user's financial data
     accounts = db.query(Account).filter(Account.user_id == current_user.id).all()
     

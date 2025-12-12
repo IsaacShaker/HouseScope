@@ -55,14 +55,7 @@ def get_current_user(
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    """
-    Register a new user account.
-    
-    - **email**: Valid email address (must be unique)
-    - **password**: Password (min 8 characters recommended)
-    - **full_name**: User's full name (optional)
-    """
-    # Check if user already exists
+    """Register a new user account"""
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
         raise HTTPException(
@@ -70,7 +63,6 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered",
         )
     
-    # Create new user
     hashed_pw = hash_password(user_data.password)
     new_user = User(
         email=user_data.email,
@@ -79,9 +71,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     )
     
     db.add(new_user)
-    db.flush()  # Get user ID without committing
-    
-    # Create default categories for new user
+    db.flush()
     from app.models.category import Category
     default_categories = [
         "income", "salary", "groceries", "rent", "mortgage", 

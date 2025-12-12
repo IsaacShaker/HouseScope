@@ -11,9 +11,7 @@ from app.core.config import settings
 
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt directly"""
-    # Encode password to bytes
     password_bytes = password.encode('utf-8')
-    # Generate salt and hash
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password_bytes, salt)
     # Return as string
@@ -28,16 +26,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """
-    Create a JWT access token
-    
-    Args:
-        data: Dictionary containing user information
-        expires_delta: Optional token expiration time
-        
-    Returns:
-        Encoded JWT token string
-    """
+    """Create a JWT access token"""
     to_encode = data.copy()
     
     if expires_delta:
@@ -52,18 +41,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 def decode_token(token: str) -> dict:
-    """
-    Decode and verify a JWT token
-    
-    Args:
-        token: JWT token string
-        
-    Returns:
-        Dictionary containing token payload
-        
-    Raises:
-        JWTError: If token is invalid or expired
-    """
+    """Decode and verify a JWT token"""
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
@@ -72,15 +50,7 @@ def decode_token(token: str) -> dict:
 
 
 def decode_access_token(token: str) -> Optional[dict]:
-    """
-    Decode and verify a JWT access token
-    
-    Args:
-        token: JWT token string
-        
-    Returns:
-        Dictionary containing token payload or None if invalid
-    """
+    """Decode and verify a JWT access token"""
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload

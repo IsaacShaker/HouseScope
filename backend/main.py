@@ -7,14 +7,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine, Base
-
-# Import routers
 from app.api import auth, accounts, transactions, financial, properties, categories
 
-# Create database tables
 Base.metadata.create_all(bind=engine)
 
-# Initialize FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,

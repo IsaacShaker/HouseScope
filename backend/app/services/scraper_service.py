@@ -30,21 +30,7 @@ class PropertyScraperService:
         min_baths: Optional[float] = None,
         property_type: Optional[str] = None
     ) -> dict:
-        """
-        Search for properties across sources and save to database
-        
-        Args:
-            city: City name
-            state: State abbreviation
-            sources: List of sources to scrape (default: all)
-            max_price: Maximum price filter
-            min_beds: Minimum bedrooms
-            min_baths: Minimum bathrooms
-            property_type: Type of property
-            
-        Returns:
-            Dictionary with results summary
-        """
+        """Search for properties across sources and save to database"""
         if sources is None:
             sources = list(self.scrapers.keys())
         
