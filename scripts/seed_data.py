@@ -40,6 +40,7 @@ def seed_sample_data():
             user_id=user.id,
             account_type="checking",
             institution_name="Sample Bank",
+            account_name="Main Checking",
             balance=Decimal("5000.00"),
             last_synced=datetime.utcnow()
         )
@@ -48,7 +49,9 @@ def seed_sample_data():
             user_id=user.id,
             account_type="savings",
             institution_name="Sample Bank",
+            account_name="Emergency Fund",
             balance=Decimal("15000.00"),
+            interest_rate=Decimal("2.5"),
             last_synced=datetime.utcnow()
         )
         
@@ -56,7 +59,10 @@ def seed_sample_data():
             user_id=user.id,
             account_type="credit",
             institution_name="Credit Card Co",
+            account_name="Rewards Card",
             balance=Decimal("-2500.00"),
+            credit_limit=Decimal("10000.00"),
+            interest_rate=Decimal("18.99"),
             last_synced=datetime.utcnow()
         )
         

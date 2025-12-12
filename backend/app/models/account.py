@@ -16,7 +16,10 @@ class Account(Base):
     plaid_account_id = Column(String, unique=True, nullable=True)
     account_type = Column(String, nullable=False)  # checking, savings, credit, loan
     institution_name = Column(String, nullable=False)
+    account_name = Column(String, nullable=True)  # Custom name for the account
     balance = Column(Numeric(12, 2), nullable=False)
+    credit_limit = Column(Numeric(12, 2), nullable=True)  # For credit accounts
+    interest_rate = Column(Numeric(5, 2), nullable=True)  # Interest rate percentage
     last_synced = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
