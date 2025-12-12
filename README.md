@@ -16,113 +16,76 @@ HouseScope consists of three integrated components:
 
 ---
 
-## 🚀 Features
+## Features
 
 ### Finance Dashboard
-- 📊 Net worth calculation and tracking
-- 💵 Income and expense analysis
-- 💰 Savings rate computation
-- 🚨 Emergency fund assessment
-- 📈 Interactive financial visualizations
-- 🔗 Plaid API integration for automatic bank sync
-- 📄 CSV import for manual data entry
+- Net worth calculation and tracking
+- Income and expense analysis with category breakdown
+- Savings rate computation and emergency fund assessment
+- Interactive financial visualizations
+- CSV import for transaction data
 
 ### Affordability Calculator
-- 🏡 Maximum home price calculation
-- 📉 DTI (Debt-to-Income) ratio analysis
-- 💳 Monthly payment breakdown (PITI + PMI)
-- 💸 Down payment requirements
-- 🏦 Cash reserve recommendations
-- 🎯 Safe price range estimation
+- Maximum home price calculation based on income and debts
+- DTI (Debt-to-Income) ratio analysis
+- Monthly payment breakdown including PITI and PMI
+- Down payment and cash reserve recommendations
+- Safe price range estimation
 
-### Property Deal Analyzer
-- 🔍 Real-time property scraping (Zillow, Realtor.com)
-- ⭐ **HomeBuyerScore**: Rates properties for primary residence (0-100)
-  - Affordability match
-  - Location quality
-  - Property value
-  - Long-term sustainability
-- 💼 **InvestorScore**: Rates properties for investment potential (0-100)
-  - Cap rate analysis
-  - Cash-on-cash return
-  - 1% rule compliance
-  - Market strength
-  - Appreciation potential
-- 🎨 Visual property cards with scores
-- 🔎 Advanced filtering and sorting
-- 🚗 **Commute Time Filter**: Filter properties by commute requirements
-  - Support for multiple roommates
-  - Different destinations for each person
-  - Multiple transportation modes (driving, walking, bicycling, transit)
-  - Uses free OpenStreetMap & OSRM APIs (no API key required!)
-  - Display commute times on property cards
+### Property Analysis
+- Property scraping from Redfin
+- Commute time analysis with multiple destinations
+- Support for different transportation modes (driving, walking, bicycling, transit)
+- Property filtering and comparison tools
+- Visual property cards with key metrics
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
-### Backend
-- **Framework**: FastAPI (Python 3.10+)
-- **Database**: PostgreSQL / SQLite
-- **ORM**: SQLAlchemy
-- **Authentication**: JWT tokens with bcrypt
-- **Web Scraping**: BeautifulSoup4, Selectolax
-- **Financial Integration**: Plaid API
+**Backend:** FastAPI, Python 3.10+, SQLAlchemy, SQLite
 
-### Frontend
-- **Framework**: React 18 with Vite
-- **Routing**: React Router v6
-- **HTTP Client**: Axios
-- **Charts**: Chart.js / Recharts
-- **Styling**: Tailwind CSS (optional)
+**Frontend:** React 18, Vite, React Router, Axios, Chart.js, Tailwind CSS
 
-### DevOps
-- **Testing**: pytest, pytest-cov
-- **Code Quality**: black, flake8, pylint
-- **Version Control**: Git
+**Testing:** pytest, pytest-cov
 
 ---
 
-## 📁 Repository Structure
+## Project Structure
 
 ```
 HouseScope/
-├── backend/                 # FastAPI backend
+├── backend/          # FastAPI backend
 │   ├── app/
-│   │   ├── api/            # API route handlers
-│   │   ├── models/         # Database models
-│   │   ├── services/       # Business logic
-│   │   ├── scrapers/       # Web scraping modules
-│   │   └── core/           # Core functionality
-│   ├── tests/              # Backend tests
-│   ├── main.py             # Application entry point
-│   └── requirements.txt    # Python dependencies
-│
-├── frontend/               # React frontend
-│   ├── src/
-│   │   ├── components/    # Reusable components
-│   │   ├── pages/         # Page components
-│   │   └── services/      # API services
-│   └── package.json       # Node dependencies
-│
-├── scripts/               # Utility scripts
-└── data/                  # Local data storage
+│   │   ├── api/      # API endpoints
+│   │   ├── models/   # Database models
+│   │   ├── services/ # Business logic
+│   │   ├── scrapers/ # Web scraping
+│   │   └── core/     # Config & database
+│   └── tests/
+├── frontend/         # React frontend
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       └── services/
+└── scripts/          # Database utilities
 ```
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- Python 3.10 or higher
-- Node.js 18+ and npm
+- Python 3.10+
+- Node.js 18+
 - Git
-- (Optional) PostgreSQL for production
 
 ### Installation
 
-#### 1. Clone the Repository
+### Installation
+
+#### 1. Clone Repository
 
 ```bash
 git clone https://github.com/IsaacShaker/HouseScope.git
@@ -132,257 +95,90 @@ cd HouseScope
 #### 2. Backend Setup
 
 ```bash
-# Navigate to backend directory
 cd backend
-
-# Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# On Linux/Mac:
-source venv/bin/activate
-# On Windows:
-# venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# Copy environment template
 cp ../.env.example .env
-
-# Edit .env and add your configuration
-# Required: SECRET_KEY
-# Optional: PLAID_CLIENT_ID, PLAID_SECRET
-
-# Initialize database
 python -c "from app.core.database import Base, engine; Base.metadata.create_all(bind=engine)"
 ```
-
-**Environment Variables:**
-- `SECRET_KEY`: Required for JWT authentication
-- `PLAID_CLIENT_ID` & `PLAID_SECRET`: Optional, for bank account integration
-
 
 #### 3. Frontend Setup
 
 ```bash
-# Navigate to frontend directory
-cd ../frontend
-
-# Install dependencies
+cd frontend
 npm install
-
-# Create environment file
 echo "VITE_API_URL=http://localhost:8000/api" > .env
 ```
 
 ### Running the Application
 
-#### Start Backend Server
-
+**Backend:**
 ```bash
 cd backend
-source venv/bin/activate  # Activate venv if not already active
+source venv/bin/activate
 python main.py
 ```
+API: http://localhost:8000 | Docs: http://localhost:8000/docs
 
-The API will be available at:
-- API: http://localhost:8000
-- Interactive Docs: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
-#### Start Frontend Development Server
-
+**Frontend:**
 ```bash
 cd frontend
 npm run dev
 ```
-
-The frontend will be available at http://localhost:5173
-
----
-
-## 🔑 Configuration
-
-### Environment Variables
-
-Copy `.env.example` to `.env` and configure:
-
-#### Required
-
-```env
-SECRET_KEY=your-secret-key-here
-PLAID_CLIENT_ID=your-plaid-client-id
-PLAID_SECRET=your-plaid-secret-sandbox
-```
-
-#### Optional
-
-- `DATABASE_URL`: Database connection string (defaults to SQLite)
-- `API_PORT`: Backend port (default: 8000)
-- `PLAID_ENV`: Plaid environment (sandbox, development, production)
-- Mortgage defaults (interest rate, tax rate, insurance rate)
-
-See `.env.example` for all available options.
+App: http://localhost:5173
 
 ---
 
-## 🧪 Testing
-
-### Backend Tests
+## Testing
 
 ```bash
 cd backend
-pytest                          # Run all tests
-pytest --cov=app               # Run with coverage
-pytest tests/test_services/    # Run specific test directory
-```
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm test
+pytest --cov=app
 ```
 
 ---
 
-## 🗃️ Database Schema
+## Database Models
 
-Key models:
-
-- **User**: User accounts and authentication
-- **Account**: Bank accounts (linked via Plaid or manual)
-- **Transaction**: Financial transactions
-- **Property**: Real estate listings
-- **UserFinancial**: Calculated financial snapshots
-
----
-
-## 📊 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Create new user
-- `POST /api/auth/login` - User login
-
-### Financial Data
-- `GET /api/accounts` - Get all accounts
-- `GET /api/transactions` - Get transactions
-- `GET /api/financials/dashboard` - Get financial metrics
-- `POST /api/plaid/link` - Initialize Plaid connection
-
-### Affordability
-- `GET /api/affordability/calculate` - Calculate affordability range
-
-### Properties
-- `GET /api/properties` - List properties
-- `GET /api/properties/{id}` - Get property details
-- `POST /api/properties/scrape` - Trigger scraping
-
-Full API documentation: http://localhost:8000/docs (when server is running)
+- **User** - Authentication and user accounts
+- **Account** - Financial accounts
+- **Transaction** - Income and expense records
+- **Category** - Transaction categories
+- **Property** - Real estate listings
+- **UserFinancial** - Calculated financial metrics
 
 ---
 
-## 🎯 Development Roadmap
+## API Endpoints
 
-### Phase 1: Foundation ✅ (Weeks 1-2)
-- [x] Repository structure
-### Completed Features
-- Repository structure and setup
-- User authentication and authorization
-- Financial dashboard with net worth tracking
-- Transaction management and categorization
+**Authentication:** `/api/auth/register`, `/api/auth/login`
+
+**Financial:** `/api/accounts`, `/api/transactions`, `/api/categories`, `/api/financials/dashboard`
+
+**Affordability:** `/api/affordability/calculate`
+
+**Properties:** `/api/properties`, `/api/properties/scrape`
+
+Full documentation: http://localhost:8000/docs
+
+---
+
+## Status
+
+### Current Features
+- User authentication
+- Financial dashboard with transaction tracking
 - Affordability calculator
 - Property scraping (Redfin)
 - Commute time analysis
-- Interactive data visualizations
+- Interactive visualizations
 
 ### Future Enhancements
-- Plaid API integration for automatic bank sync
-- Additional property data sources
-- Mobile responsive design improvements
-- Advanced property filtering options
-- Historical data tracking and trends
-
-## 🤝 Contributing
-
-This is an academic project for ECE 1895. Contributions and feedback are welcome!
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- Additional property sources
+- Advanced filtering
+- Historical trend analysis
 
 ---
 
-## 📝 License
-
-This project is for educational purposes as part of ECE 1895.
-
----
-
-## 🙏 Acknowledgments
-
-- **Plaid**: Financial data connectivity platform
-- **FastAPI**: Modern Python web framework
-- **React**: Frontend framework
-- **Chart.js**: Data visualization library
-
----
-
-## 📧 Contact
-
-**Project**: HouseScope  
-**Course**: ECE 1895  
 **Repository**: [github.com/IsaacShaker/HouseScope](https://github.com/IsaacShaker/HouseScope)
-
----
-
-## 📌 Important Notes
-
-### Plaid Sandbox
-
-This project uses Plaid's Sandbox environment for development. To get started:
-
-1. Sign up at [plaid.com](https://plaid.com)
-2. Get sandbox credentials (client_id and secret)
-3. Add to `.env` file
-4. Use sandbox credentials for testing
-
-### Web Scraping Ethics
-
-- Respect `robots.txt`
-- Implement rate limiting (2-3 requests/second)
-- Cache aggressively
-- Identify your scraper with proper User-Agent
-- Only scrape public data
-
-### Security Best Practices
-
-- Never commit `.env` files
-- Use strong SECRET_KEY in production
-- Enable HTTPS in production
-- Regularly update dependencies
-- Validate all user inputs
-
----
-
-## 🎓 Learning Objectives
-
-This project demonstrates:
-
-- Full-stack web development
-- RESTful API design
-- Database modeling and ORM usage
-- Financial calculations and algorithms
-- Web scraping techniques
-- Data visualization
-- Authentication and security
-- Testing and code quality
-- Project structure and documentation
-
----
-
-**Built with ❤️ for ECE 1895**
