@@ -117,10 +117,8 @@ class RedfinScraper(BaseScraper):
         logger.info(f"Scraping Redfin for properties in {city}, {state}")
         
         try:
-            # Get location path
             location_path = self._get_location_path(city, state)
             
-            # Map property type to Redfin types
             property_types = None
             if property_type:
                 type_map = {
@@ -130,18 +128,14 @@ class RedfinScraper(BaseScraper):
                 }
                 property_types = type_map.get(property_type.lower())
             
-            # Update scraper config for this search
             self.location_path = location_path
             self.max_price = max_price
             self.min_beds = min_beds
             self.min_baths = min_baths
             self.property_types = property_types
             
-            # Scrape the first page only (to avoid long-running scrapes)
-            logger.info("Scraping first 3 pages of Redfin results...")
+            logger.info("Scraping first 3 pages of Redfin results")
             listings = self.scrape(pages="3")
-            
-            # Convert to our standard format
             properties = []
             for listing in listings:
                 try:
@@ -162,16 +156,13 @@ class RedfinScraper(BaseScraper):
     def _convert_redfin_listing(self, listing: Dict, city: str, state: str) -> Optional[Dict]:
         """Convert a Redfin listing to our standard format"""
         try:
-            # Parse price
             price_str = listing.get('price', '').replace('$', '').replace(',', '').strip()
             if not price_str or price_str == '—':
                 return None
             
-            # Handle price ranges (e.g., "$200K-$250K")
             if '-' in price_str:
                 price_str = price_str.split('-')[0]
             
-            # Handle K/M suffixes
             if 'K' in price_str.upper():
                 price = float(price_str.upper().replace('K', '')) * 1000
             elif 'M' in price_str.upper():
@@ -179,7 +170,6 @@ class RedfinScraper(BaseScraper):
             else:
                 price = float(price_str)
             
-            # Parse beds
             beds_str = listing.get('beds', '').strip()
             beds = 0
             if beds_str and beds_str != '—':
@@ -187,7 +177,6 @@ class RedfinScraper(BaseScraper):
                 if beds_match:
                     beds = int(beds_match.group(1))
             
-            # Parse baths
             baths_str = listing.get('baths', '').strip()
             baths = 0.0
             if baths_str and baths_str != '—':
@@ -195,7 +184,6 @@ class RedfinScraper(BaseScraper):
                 if baths_match:
                     baths = float(baths_match.group(1))
             
-            # Parse sqft
             sqft_str = listing.get('area', '').replace(',', '').strip()
             sqft = 0
             if sqft_str and sqft_str != '—':
@@ -203,12 +191,9 @@ class RedfinScraper(BaseScraper):
                 if sqft_match:
                     sqft = int(sqft_match.group(1))
             
-            # Parse address
             address_full = listing.get('address', '').strip()
             address_parts = address_full.split(',')
             street = address_parts[0].strip() if address_parts else address_full
-            
-            # Try to extract zip from address
             zip_code = ""
             zip_match = re.search(r'\b(\d{5})\b', address_full)
             if zip_match:

@@ -97,7 +97,6 @@ def get_home_affordability(
     db: Session = Depends(get_db),
 ):
     """Calculate home affordability based on current financial situation"""
-    # Get user's financial data
     accounts = db.query(Account).filter(Account.user_id == current_user.id).all()
     
     if not accounts:
@@ -106,50 +105,40 @@ def get_home_affordability(
             detail="No accounts found. Add accounts to calculate affordability.",
         )
     
-    # Calculate financial metrics
     calculator = FinancialCalculator(db)
     monthly_income = calculator.calculate_monthly_income(current_user.id)
     monthly_expenses = calculator.calculate_monthly_expenses(current_user.id)
     assets, liabilities = calculator.calculate_assets_liabilities(current_user.id)
     available_cash = assets
     
-    # Get user's stored financial info (if exists)
     user_financial = db.query(UserFinancial).filter(UserFinancial.user_id == current_user.id).first()
     existing_debt_payments = Decimal(str(user_financial.monthly_debt_payment)) if user_financial else Decimal("0")
     
-    # Use provided interest rate or default
     interest_rate_decimal = interest_rate / 100 if interest_rate else None
     
-    # Calculate max monthly housing payment (28% DTI rule)
     max_monthly_payment = AffordabilityService.calculate_max_monthly_payment(
         monthly_income,
         existing_debt_payments,
         dti_limit=0.28
     )
     
-    # Add HOA to the calculation if provided
     max_monthly_payment_for_mortgage = max_monthly_payment - Decimal(str(hoa_monthly or 0))
     
-    # Calculate max home price
     max_price = AffordabilityService.calculate_max_home_price(
         max_monthly_payment_for_mortgage,
-        down_payment_percent / 100,  # Convert to decimal
+        down_payment_percent / 100,
         interest_rate_decimal,
         loan_term_years
     )
     
-    # Calculate safe price (80% of max)
     safe_max_price = max_price * Decimal("0.8")
     
-    # Get payment breakdown for max price
     payment_breakdown = AffordabilityService.calculate_monthly_payment_breakdown(
         max_price,
         down_payment_percent / 100,
         interest_rate_decimal,
         loan_term_years
     )
-    
-    # Add HOA to the breakdown
     payment_breakdown["hoa"] = Decimal(str(hoa_monthly or 0))
     payment_breakdown["total"] = payment_breakdown["total"] + payment_breakdown["hoa"]
     
@@ -237,11 +226,9 @@ def update_financial_profile(
     user_financial = db.query(UserFinancial).filter(UserFinancial.user_id == current_user.id).first()
     
     if user_financial:
-        # Update existing
         user_financial.annual_income = annual_income
         user_financial.monthly_debt_payment = monthly_debt_payment
     else:
-        # Create new
         user_financial = UserFinancial(
             user_id=current_user.id,
             annual_income=annual_income,

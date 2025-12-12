@@ -109,7 +109,6 @@ def update_account(
             detail="Account not found",
         )
     
-    # Update fields if provided
     update_data = account_data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(account, field, value)

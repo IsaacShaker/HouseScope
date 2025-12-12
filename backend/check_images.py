@@ -7,10 +7,7 @@ from app.models.property import Property
 
 db = SessionLocal()
 props = db.query(Property).limit(50).all()
-print('Properties in database:')
 for p in props:
     img_status = 'Yes' if p.image_url else 'No'
-    print(f'ID: {p.id}, Address: {p.address[:40]}, Has Image: {img_status}')
-    if p.image_url:
-        print(f'  Image URL: {p.image_url[:60]}...')
+    print(f'{p.id} | {p.address[:40]} | Image: {img_status}')
 db.close()

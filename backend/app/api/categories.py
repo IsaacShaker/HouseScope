@@ -41,7 +41,6 @@ def create_category(
     """
     Create a new category for the current user.
     """
-    # Check if category already exists for this user
     existing = (
         db.query(Category)
         .filter(
@@ -91,7 +90,6 @@ def update_category(
             detail="Category not found",
         )
     
-    # Check if new name conflicts with existing category
     existing = (
         db.query(Category)
         .filter(
