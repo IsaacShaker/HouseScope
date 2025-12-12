@@ -7,6 +7,19 @@ import {
   NetWorthTrendChart,
   FinancialHealthChart,
 } from '../components/Charts';
+import { 
+  Wallet, 
+  TrendingUp, 
+  TrendingDown, 
+  PiggyBank, 
+  Shield, 
+  CreditCard,
+  DollarSign,
+  Home,
+  Building2,
+  Receipt,
+  Calculator
+} from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -69,7 +82,7 @@ const Dashboard = () => {
 
       {!hasData ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to HouseScope! 👋</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to HouseScope</h2>
           <p className="text-gray-600 mb-6">
             Get started by adding your financial accounts and transactions.
           </p>
@@ -90,9 +103,11 @@ const Dashboard = () => {
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="text-3xl">💰</div>
+                      <div className="rounded-full bg-indigo-100 p-3">
+                        <Wallet className="h-6 w-6 text-indigo-600" />
+                      </div>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-5 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">Net Worth</dt>
                         <dd className="text-2xl font-semibold text-gray-900">
@@ -108,9 +123,11 @@ const Dashboard = () => {
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="text-3xl">📈</div>
+                      <div className="rounded-full bg-green-100 p-3">
+                        <TrendingUp className="h-6 w-6 text-green-600" />
+                      </div>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-5 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">Monthly Income</dt>
                         <dd className="text-2xl font-semibold text-green-600">
@@ -126,9 +143,11 @@ const Dashboard = () => {
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="text-3xl">📉</div>
+                      <div className="rounded-full bg-red-100 p-3">
+                        <TrendingDown className="h-6 w-6 text-red-600" />
+                      </div>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-5 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">Monthly Expenses</dt>
                         <dd className="text-2xl font-semibold text-red-600">
@@ -144,9 +163,11 @@ const Dashboard = () => {
                 <div className="p-5">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      <div className="text-3xl">💸</div>
+                      <div className="rounded-full bg-purple-100 p-3">
+                        <PiggyBank className="h-6 w-6 text-purple-600" />
+                      </div>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
+                    <div className="ml-5 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 truncate">Savings Rate</dt>
                         <dd className="text-2xl font-semibold text-indigo-600">
@@ -162,31 +183,40 @@ const Dashboard = () => {
             {/* Additional Metrics */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
               <div className="bg-white overflow-hidden shadow rounded-lg p-5">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Emergency Buffer</h3>
+                <div className="flex items-center mb-3">
+                  <Shield className="h-5 w-5 text-indigo-600 mr-2" />
+                  <h3 className="text-lg font-medium text-gray-900">Emergency Buffer</h3>
+                </div>
                 <p className="text-3xl font-bold text-indigo-600">
                   {dashboard.emergency_buffer_months.toFixed(1)} months
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {dashboard.emergency_buffer_months >= 6 ? '✅ Well protected' : '⚠️ Build more reserves'}
+                <p className="text-sm text-gray-600 mt-2">
+                  {dashboard.emergency_buffer_months >= 6 ? 'Well protected' : 'Build more reserves'}
                 </p>
               </div>
 
               <div className="bg-white overflow-hidden shadow rounded-lg p-5">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">DTI Ratio</h3>
+                <div className="flex items-center mb-3">
+                  <CreditCard className="h-5 w-5 text-indigo-600 mr-2" />
+                  <h3 className="text-lg font-medium text-gray-900">DTI Ratio</h3>
+                </div>
                 <p className="text-3xl font-bold text-indigo-600">
                   {dashboard.dti_ratio.toFixed(1)}%
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {dashboard.dti_ratio <= 43 ? '✅ Good ratio' : '⚠️ High debt load'}
+                <p className="text-sm text-gray-600 mt-2">
+                  {dashboard.dti_ratio <= 43 ? 'Good ratio' : 'High debt load'}
                 </p>
               </div>
 
               <div className="bg-white overflow-hidden shadow rounded-lg p-5">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Total Assets</h3>
+                <div className="flex items-center mb-3">
+                  <DollarSign className="h-5 w-5 text-green-600 mr-2" />
+                  <h3 className="text-lg font-medium text-gray-900">Total Assets</h3>
+                </div>
                 <p className="text-3xl font-bold text-green-600">
                   {formatCurrency(dashboard.assets)}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-600 mt-2">
                   Liabilities: {formatCurrency(dashboard.liabilities)}
                 </p>
               </div>
@@ -255,24 +285,27 @@ const Dashboard = () => {
 
 
             {/* Affordability Calculator CTA */}
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 shadow rounded-lg p-6 mb-6">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg rounded-lg p-6 mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">
-                    🏠 Ready to Buy a Home?
-                  </h3>
-                  <p className="text-indigo-100 mb-4">
+                  <div className="flex items-center mb-2">
+                    <Home className="h-6 w-6 text-white mr-2" />
+                    <h3 className="text-xl font-semibold text-white">
+                      Ready to Buy a Home?
+                    </h3>
+                  </div>
+                  <p className="text-indigo-50 mb-4">
                     Calculate how much house you can afford based on your financial situation
                   </p>
                   <Link
                     to="/affordability"
                     className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 font-semibold rounded-md hover:bg-indigo-50 transition"
                   >
-                    Calculate Affordability →
+                    Calculate Affordability
                   </Link>
                 </div>
-                <div className="hidden md:block text-6xl">
-                  🏡
+                <div className="hidden md:block">
+                  <Building2 className="h-24 w-24 text-white opacity-20" />
                 </div>
               </div>
             </div>
@@ -283,23 +316,23 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Link
                   to="/accounts"
-                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
                 >
-                  <span className="mr-2">🏦</span>
+                  <Building2 className="h-4 w-4 mr-2" />
                   Manage Accounts
                 </Link>
                 <Link
                   to="/transactions"
-                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
                 >
-                  <span className="mr-2">💳</span>
+                  <Receipt className="h-4 w-4 mr-2" />
                   View Transactions
                 </Link>
                 <Link
                   to="/affordability"
-                  className="flex items-center justify-center px-4 py-3 border border-indigo-600 rounded-md shadow-sm text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50"
+                  className="flex items-center justify-center px-4 py-3 border border-indigo-600 rounded-md shadow-sm text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50 transition"
                 >
-                  <span className="mr-2">🏠</span>
+                  <Calculator className="h-4 w-4 mr-2" />
                   Check Affordability
                 </Link>
               </div>

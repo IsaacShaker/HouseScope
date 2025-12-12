@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import transactionService from '../services/transactionService';
 import accountService from '../services/accountService';
+import { Upload } from 'lucide-react';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -252,8 +253,9 @@ const Transactions = () => {
                 + Add Transaction
               </button>
               
-              <label className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 cursor-pointer">
-                {uploading ? 'Uploading...' : '📤 Import CSV'}
+              <label className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 cursor-pointer flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                {uploading ? 'Uploading...' : 'Import CSV'}
                 <input
                   type="file"
                   accept=".csv"

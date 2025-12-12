@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Search, RefreshCw, Home, CheckCircle } from 'lucide-react';
 
 const API_URL = 'http://localhost:8000';
 
@@ -196,17 +197,19 @@ function Properties() {
           <button
             onClick={handleScrape}
             disabled={scraping || !filters.city || !filters.state}
-            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
           >
-            {scraping ? 'Scraping...' : '🔍 Scrape Redfin'}
+            <Search className="h-4 w-4" />
+            {scraping ? 'Scraping...' : 'Scrape Redfin'}
           </button>
           
           <button
             onClick={fetchProperties}
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
           >
-            {loading ? 'Loading...' : '🔄 Refresh Results'}
+            <RefreshCw className="h-4 w-4" />
+            {loading ? 'Loading...' : 'Refresh Results'}
           </button>
         </div>
       </div>
@@ -214,7 +217,10 @@ function Properties() {
       {/* Scrape Results */}
       {scrapeResult && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <h3 className="text-lg font-semibold text-green-800 mb-2">✅ Scraping Complete</h3>
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <h3 className="text-lg font-semibold text-green-800">Scraping Complete</h3>
+          </div>
           <p className="text-green-700 mb-2">{scrapeResult.message}</p>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -268,7 +274,7 @@ function Properties() {
             >
               {/* Property Image Placeholder */}
               <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                <span className="text-6xl">🏠</span>
+                <Home className="h-20 w-20 text-white opacity-80" />
               </div>
 
               {/* Property Details */}

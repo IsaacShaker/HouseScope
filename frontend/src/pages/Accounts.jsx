@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import accountService from '../services/accountService';
+import { Building2, PiggyBank, CreditCard, FileText, TrendingUp, Briefcase } from 'lucide-react';
 
 const Accounts = () => {
   const [accounts, setAccounts] = useState([]);
@@ -108,14 +109,14 @@ const Accounts = () => {
   };
 
   const getAccountIcon = (type) => {
-    const icons = {
-      checking: '🏦',
-      savings: '💰',
-      credit: '💳',
-      loan: '📋',
-      investment: '📈',
+    const iconMap = {
+      checking: <Building2 className="h-10 w-10 text-blue-600" />,
+      savings: <PiggyBank className="h-10 w-10 text-green-600" />,
+      credit: <CreditCard className="h-10 w-10 text-purple-600" />,
+      loan: <FileText className="h-10 w-10 text-orange-600" />,
+      investment: <TrendingUp className="h-10 w-10 text-indigo-600" />,
     };
-    return icons[type] || '💼';
+    return iconMap[type] || <Briefcase className="h-10 w-10 text-gray-600" />;
   };
 
   return (
@@ -154,7 +155,9 @@ const Accounts = () => {
             <div key={account.id} className="bg-white overflow-hidden shadow rounded-lg">
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="text-4xl">{getAccountIcon(account.account_type)}</div>
+                  <div className="rounded-full bg-gray-100 p-3">
+                    {getAccountIcon(account.account_type)}
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(account)}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import financialService from '../services/financialService';
 import authService from '../services/authService';
+import { Lightbulb, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 const Affordability = () => {
   const [user] = useState(authService.getUser());
@@ -11,7 +12,7 @@ const Affordability = () => {
   
   // Form inputs
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
-  const [interestRate, setInterestRate] = useState(7.0);
+  const [interestRate, setInterestRate] = useState(5.8);
   const [loanTermYears, setLoanTermYears] = useState(30);
   const [propertyTaxRate, setPropertyTaxRate] = useState(1.2);
   const [insuranceRate, setInsuranceRate] = useState(0.5);
@@ -220,11 +221,14 @@ const Affordability = () => {
                     </div>
                   </div>
                   <div className="mt-4 p-3 bg-white bg-opacity-20 rounded">
-                    <p className="text-sm">
-                      💡 We recommend staying in the range of{' '}
-                      <strong>{formatCurrency(affordability.recommended_range.min)}</strong> to{' '}
-                      <strong>{formatCurrency(affordability.recommended_range.max)}</strong>
-                    </p>
+                    <div className="flex items-start gap-2">
+                      <Lightbulb className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm">
+                        We recommend staying in the range of{' '}
+                        <strong>{formatCurrency(affordability.recommended_range.min)}</strong> to{' '}
+                        <strong>{formatCurrency(affordability.recommended_range.max)}</strong>
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -329,9 +333,13 @@ const Affordability = () => {
                       }`}>
                         {affordability.financial_health.dti_ratio.toFixed(1)}%
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {affordability.financial_health.dti_ratio <= 43 ? '✅ Good' : '⚠️ High'}
-                      </p>
+                      <div className="flex items-center justify-center gap-1 mt-1">
+                        {affordability.financial_health.dti_ratio <= 43 ? (
+                          <><CheckCircle className="h-3 w-3 text-green-600" /><span className="text-xs text-gray-500">Good</span></>
+                        ) : (
+                          <><AlertTriangle className="h-3 w-3 text-red-600" /><span className="text-xs text-gray-500">High</span></>
+                        )}
+                      </div>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-sm text-gray-600 mb-2">Emergency Buffer</p>
@@ -356,7 +364,10 @@ const Affordability = () => {
                   <div className="bg-white shadow rounded-lg p-6">
                     {affordability.warnings.length > 0 && (
                       <div className="mb-6">
-                        <h3 className="text-lg font-semibold text-red-700 mb-3">⚠️ Warnings</h3>
+                        <div className="flex items-center gap-2 mb-3">
+                          <AlertTriangle className="h-5 w-5 text-red-600" />
+                          <h3 className="text-lg font-semibold text-red-700">Warnings</h3>
+                        </div>
                         <ul className="space-y-2">
                           {affordability.warnings.map((warning, idx) => (
                             <li key={idx} className="flex items-start">
@@ -369,7 +380,10 @@ const Affordability = () => {
                     )}
                     {affordability.recommendations.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-blue-700 mb-3">💡 Recommendations</h3>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Lightbulb className="h-5 w-5 text-blue-600" />
+                          <h3 className="text-lg font-semibold text-blue-700">Recommendations</h3>
+                        </div>
                         <ul className="space-y-2">
                           {affordability.recommendations.map((rec, idx) => (
                             <li key={idx} className="flex items-start">

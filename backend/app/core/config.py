@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     SCRAPER_TIMEOUT: int = 10
     
     # Default Mortgage Assumptions
-    DEFAULT_INTEREST_RATE: float = 0.07
+    DEFAULT_INTEREST_RATE: float = 0.058
     DEFAULT_LOAN_TERM_YEARS: int = 30
     DEFAULT_PROPERTY_TAX_RATE: float = 0.012
     DEFAULT_INSURANCE_RATE: float = 0.005
