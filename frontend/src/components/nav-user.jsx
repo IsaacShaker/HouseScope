@@ -40,6 +40,21 @@ export function NavUser({
     navigate('/login')
   }
 
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    
+    const words = name.trim().split(/\s+/);
+    
+    if (words.length === 1) {
+      return words[0].charAt(0).toUpperCase();
+    } else if (words.length === 2) {
+      return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+    } else {
+      // 3 or more words: use first and last
+      return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+    }
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -50,7 +65,7 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{getInitials(user.name)}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -70,7 +85,7 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">{getInitials(user.name)}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>

@@ -22,13 +22,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: JSON.parse(localStorage.getItem('user') || '{}').email || "User",
-    email: JSON.parse(localStorage.getItem('user') || '{}').email || "user@example.com",
-    avatar: "",
-  },
-  navMain: [
+const navMain = [
     {
       title: "Dashboard",
       url: "/dashboard",
@@ -54,24 +48,55 @@ const data = {
       url: "/transactions",
       icon: ArrowLeftRightIcon,
     },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-  ],
-}
+];
+
+const navSecondary = [
+  {
+    title: "Settings",
+    url: "#",
+    icon: SettingsIcon,
+  },
+  {
+    title: "Help",
+    url: "#",
+    icon: HelpCircleIcon,
+  },
+];
 
 export function AppSidebar({
   ...props
 }) {
+  const [user, setUser] = React.useState(() => {
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    return {
+      name: storedUser.full_name || storedUser.email || "User",
+      email: storedUser.email || "user@example.com",
+      avatar: "",
+    };
+  });
+
+  // Update user data when localStorage changes
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      setUser({
+        name: storedUser.full_name || storedUser.email || "User",
+        email: storedUser.email || "user@example.com",
+        avatar: "",
+      });
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom event when user logs in
+    window.addEventListener('userUpdated', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userUpdated', handleStorageChange);
+    };
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -87,11 +112,11 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMain} />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

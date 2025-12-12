@@ -28,6 +28,7 @@ def seed_sample_data():
         user = User(
             email="demo@housescope.com",
             hashed_password=hash_password("demo123"),
+            full_name="Demo User",
             created_at=datetime.utcnow()
         )
         db.add(user)

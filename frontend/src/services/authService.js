@@ -28,6 +28,9 @@ const authService = {
     // Get user info
     const userResponse = await api.get('/auth/me');
     localStorage.setItem('user', JSON.stringify(userResponse.data));
+    
+    // Dispatch custom event to notify components that user data has changed
+    window.dispatchEvent(new Event('userUpdated'));
 
     return userResponse.data;
   },
