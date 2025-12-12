@@ -101,8 +101,6 @@ def scrape_properties(
             property_type=search.property_type
         )
         
-        service.close_scrapers()
-        
         return ScrapeResultResponse(
             message=f"Successfully scraped properties for {search.city}, {search.state}",
             total_found=results['total_found'],

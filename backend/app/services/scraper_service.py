@@ -17,7 +17,7 @@ class PropertyScraperService:
     def __init__(self, db: Session):
         self.db = db
         self.scrapers = {
-            'redfin': RedfinScraper(rate_limit=3.0, headless=True)
+            'redfin': RedfinScraper(rate_limit=3.0, headless=False)
         }
     
     def search_and_save_properties(
@@ -191,8 +191,3 @@ class PropertyScraperService:
         self.db.commit()
         logger.info(f"Deleted {deleted} properties older than {days} days")
         return deleted
-    
-    def close_scrapers(self):
-        """Close all scraper sessions"""
-        for scraper in self.scrapers.values():
-            scraper.close()

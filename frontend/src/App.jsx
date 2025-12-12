@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import Accounts from './pages/Accounts'
 import Affordability from './pages/Affordability'
 import Transactions from './pages/Transactions'
+import Properties from './pages/Properties'
 import ProtectedRoute from './components/ProtectedRoute'
 import authService from './services/authService'
 
@@ -54,6 +55,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/properties"
+          element={
+            <ProtectedRoute>
+              <Properties />
             </ProtectedRoute>
           }
         />

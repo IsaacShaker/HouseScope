@@ -95,6 +95,12 @@ const Dashboard = () => {
               >
                 Affordability
               </Link>
+              <Link
+                to="/properties"
+                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Properties
+              </Link>
               <button
                 onClick={handleLogout}
                 className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
