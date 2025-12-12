@@ -54,51 +54,28 @@ const Affordability = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/dashboard" className="text-2xl font-bold text-indigo-600">
-                🏠 HouseScope
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">{user?.email}</span>
-              <Link
-                to="/dashboard"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                ← Back to Dashboard
-              </Link>
-            </div>
-          </div>
+    <>
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Home Affordability Calculator</h1>
+        <p className="text-gray-600 mt-2">
+          Calculate how much house you can afford based on your current financial situation
+        </p>
+      </div>
+
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
         </div>
-      </nav>
+      )}
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Home Affordability Calculator</h1>
-          <p className="mt-2 text-gray-600">
-            Calculate how much house you can afford based on your current financial situation
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Input Panel */}
           <div className="lg:col-span-1">
             <div className="bg-white shadow rounded-lg p-6 sticky top-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Loan Parameters</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Loan Parameters</h2>
               
-              <div className="space-y-6">
+            <div className="space-y-6">
                 {/* Down Payment */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -412,12 +389,11 @@ const Affordability = () => {
                 <p className="text-gray-600">
                   Adjust the parameters on the left and click "Calculate Affordability" to see your results.
                 </p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

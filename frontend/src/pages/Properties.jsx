@@ -96,7 +96,8 @@ function Properties() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <>
+      {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Property Search</h1>
         <p className="text-gray-600">Search and scrape real estate listings</p>
@@ -341,7 +342,7 @@ function Properties() {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }
 

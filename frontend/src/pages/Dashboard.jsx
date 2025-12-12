@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
 import financialService from '../services/financialService';
-import accountService from '../services/accountService';
 import {
   ExpenseBreakdownChart,
   IncomeExpensesChart,
@@ -12,7 +10,6 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -23,9 +20,6 @@ const Dashboard = () => {
 
   const loadDashboard = async () => {
     try {
-      const userData = authService.getUser();
-      setUser(userData);
-      
       const dashboardData = await financialService.getDashboard();
       setDashboard(dashboardData);
     } catch (err) {
@@ -39,11 +33,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
-  };
-
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -53,7 +42,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
@@ -65,78 +54,36 @@ const Dashboard = () => {
   const hasData = dashboard && dashboard.account_count > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-indigo-600">🏠 HouseScope</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                {user?.email}
-              </span>
-              <Link
-                to="/accounts"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Accounts
-              </Link>
-              <Link
-                to="/transactions"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Transactions
-              </Link>
-              <Link
-                to="/affordability"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Affordability
-              </Link>
-              <Link
-                to="/properties"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Properties
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
-              >
-                Logout
-              </button>
-            </div>
+    <>
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Financial Dashboard</h1>
+        <p className="text-gray-600 mt-2">Overview of your financial health</p>
+      </div>
+
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
+      {!hasData ? (
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to HouseScope! 👋</h2>
+          <p className="text-gray-600 mb-6">
+            Get started by adding your financial accounts and transactions.
+          </p>
+          <div className="space-x-4">
+            <Link
+              to="/accounts"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              Add Account
+            </Link>
           </div>
         </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {error && (
-          <div className="mb-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        {!hasData ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to HouseScope! 👋</h2>
-            <p className="text-gray-600 mb-6">
-              Get started by adding your financial accounts and transactions.
-            </p>
-            <div className="space-x-4">
-              <Link
-                to="/accounts"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Add Account
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <>
+      ) : (
+        <>
             {/* Financial Metrics */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
               <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -359,8 +306,7 @@ const Dashboard = () => {
             </div>
           </>
         )}
-      </main>
-    </div>
+    </>
   );
 };
 

@@ -10,7 +10,27 @@ import Affordability from './pages/Affordability'
 import Transactions from './pages/Transactions'
 import Properties from './pages/Properties'
 import ProtectedRoute from './components/ProtectedRoute'
+import { AppSidebar } from "@/components/app-sidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
 import authService from './services/authService'
+
+function AppLayout({ children }) {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
+}
 
 function App() {
   return (
@@ -30,7 +50,9 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <AppLayout>
+                <Dashboard />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
@@ -38,7 +60,9 @@ function App() {
           path="/accounts"
           element={
             <ProtectedRoute>
-              <Accounts />
+              <AppLayout>
+                <Accounts />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
@@ -46,7 +70,9 @@ function App() {
           path="/affordability"
           element={
             <ProtectedRoute>
-              <Affordability />
+              <AppLayout>
+                <Affordability />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
@@ -54,7 +80,9 @@ function App() {
           path="/transactions"
           element={
             <ProtectedRoute>
-              <Transactions />
+              <AppLayout>
+                <Transactions />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
@@ -62,7 +90,9 @@ function App() {
           path="/properties"
           element={
             <ProtectedRoute>
-              <Properties />
+              <AppLayout>
+                <Properties />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
