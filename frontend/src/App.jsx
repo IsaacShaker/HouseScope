@@ -8,6 +8,7 @@ import Accounts from './pages/Accounts'
 import Affordability from './pages/Affordability'
 import Transactions from './pages/Transactions'
 import Properties from './pages/Properties'
+import Settings from './pages/Settings'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -91,6 +92,16 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <Properties />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Settings />
               </AppLayout>
             </ProtectedRoute>
           }

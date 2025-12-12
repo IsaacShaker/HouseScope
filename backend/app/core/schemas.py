@@ -3,7 +3,7 @@ Pydantic schemas for request/response validation
 """
 
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime, date
 from decimal import Decimal
 
@@ -83,7 +83,7 @@ class AccountResponse(AccountBase):
 # ============================================================================
 
 class TransactionBase(BaseModel):
-    date: datetime
+    date: date
     amount: Decimal
     category: Optional[str] = None
     merchant: Optional[str] = None
@@ -95,7 +95,8 @@ class TransactionCreate(TransactionBase):
 
 
 class TransactionUpdate(BaseModel):
-    date: Optional[datetime] = None
+    account_id: Optional[int] = None
+    date: Optional[Union[date, str]] = None
     amount: Optional[Decimal] = None
     category: Optional[str] = None
     merchant: Optional[str] = None
@@ -244,3 +245,24 @@ class CSVImportResponse(BaseModel):
     success: bool
     transactions_imported: int
     errors: List[str] = []
+
+
+# ============================================================================
+# Category Schemas
+# ============================================================================
+
+class CategoryCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+
+
+class CategoryUpdate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+
+
+class CategoryResponse(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

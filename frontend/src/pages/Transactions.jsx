@@ -30,6 +30,7 @@ const Transactions = () => {
     description: '',
     amount: '',
     category: '',
+    merchant: '',
   });
 
   useEffect(() => {
@@ -133,6 +134,7 @@ const Transactions = () => {
       description: '',
       amount: '',
       category: categories[0] || 'other',
+      merchant: '',
     });
     setShowModal(true);
   };
@@ -143,8 +145,9 @@ const Transactions = () => {
       account_id: transaction.account_id,
       date: transaction.date,
       description: transaction.description,
-      amount: Math.abs(transaction.amount),
+      amount: transaction.amount,
       category: transaction.category,
+      merchant: transaction.merchant || '',
     });
     setShowModal(true);
   };
@@ -178,7 +181,12 @@ const Transactions = () => {
       fetchTransactions();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save transaction');
+      const errorDetail = err.response?.data?.detail;
+      if (Array.isArray(errorDetail)) {
+        setError(errorDetail.map(e => `${e.loc.join('.')}: ${e.msg}`).join(', '));
+      } else {
+        setError(errorDetail || 'Failed to save transaction');
+      }
     }
   };
 
@@ -199,7 +207,7 @@ const Transactions = () => {
 
   const getAccountName = (accountId) => {
     const account = accounts.find((a) => a.id === accountId);
-    return account ? account.name : 'Unknown';
+    return account ? (account.account_name || account.institution_name) : 'Unknown';
   };
 
   return (
@@ -275,7 +283,7 @@ const Transactions = () => {
                 <option value="">All Accounts</option>
                 {accounts.map((account) => (
                   <option key={account.id} value={account.id}>
-                    {account.name}
+                    {account.account_name || account.institution_name}
                   </option>
                 ))}
               </select>
@@ -443,7 +451,7 @@ const Transactions = () => {
                     >
                       {accounts.map((account) => (
                         <option key={account.id} value={account.id}>
-                          {account.name}
+                          {account.account_name || account.institution_name}
                         </option>
                       ))}
                     </select>

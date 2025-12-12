@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.core.database import engine, Base
 
 # Import routers
-from app.api import auth, accounts, transactions, financial, properties
+from app.api import auth, accounts, transactions, financial, properties, categories
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -38,6 +38,7 @@ app.include_router(accounts.router, prefix=settings.API_PREFIX)
 app.include_router(transactions.router, prefix=settings.API_PREFIX)
 app.include_router(financial.router, prefix=settings.API_PREFIX)
 app.include_router(properties.router, prefix=settings.API_PREFIX)
+app.include_router(categories.router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 async def root():

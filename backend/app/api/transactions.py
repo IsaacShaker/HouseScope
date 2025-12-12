@@ -183,6 +183,12 @@ def update_transaction(
     
     # Update fields
     update_data = transaction_data.model_dump(exclude_unset=True)
+    
+    # Convert date string to date object if needed
+    if 'date' in update_data and isinstance(update_data['date'], str):
+        from datetime import datetime as dt
+        update_data['date'] = dt.strptime(update_data['date'], '%Y-%m-%d').date()
+    
     for field, value in update_data.items():
         setattr(transaction, field, value)
     
@@ -332,18 +338,16 @@ def get_categories(
     db: Session = Depends(get_db),
 ):
     """
-    Get list of unique transaction categories for the current user.
+    Get list of categories for the current user.
+    Returns user-defined categories from the categories table.
     """
-    # Get user's account IDs
-    user_account_ids = [
-        acc.id for acc in db.query(Account).filter(Account.user_id == current_user.id).all()
-    ]
+    from app.models.category import Category
     
     categories = (
-        db.query(Transaction.category)
-        .filter(Transaction.account_id.in_(user_account_ids))
-        .distinct()
+        db.query(Category)
+        .filter(Category.user_id == current_user.id)
+        .order_by(Category.name)
         .all()
     )
     
-    return {"categories": [cat[0] for cat in categories if cat[0]]}
+    return {"categories": [cat.name for cat in categories]}

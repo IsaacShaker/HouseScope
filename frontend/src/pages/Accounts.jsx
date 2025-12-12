@@ -6,6 +6,7 @@ const Accounts = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingAccount, setEditingAccount] = useState(null);
   const [formData, setFormData] = useState({
     account_type: 'checking',
     institution_name: '',
@@ -33,13 +34,21 @@ const Accounts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await accountService.createAccount({
+      const accountData = {
         ...formData,
         balance: parseFloat(formData.balance) || 0,
         credit_limit: formData.credit_limit ? parseFloat(formData.credit_limit) : null,
         interest_rate: formData.interest_rate ? parseFloat(formData.interest_rate) : null,
-      });
+      };
+
+      if (editingAccount) {
+        await accountService.updateAccount(editingAccount.id, accountData);
+      } else {
+        await accountService.createAccount(accountData);
+      }
+
       setShowModal(false);
+      setEditingAccount(null);
       setFormData({
         account_type: 'checking',
         institution_name: '',
@@ -50,8 +59,34 @@ const Accounts = () => {
       });
       loadAccounts();
     } catch (err) {
-      alert('Failed to create account');
+      alert(editingAccount ? 'Failed to update account' : 'Failed to create account');
     }
+  };
+
+  const handleEdit = (account) => {
+    setEditingAccount(account);
+    setFormData({
+      account_type: account.account_type,
+      institution_name: account.institution_name,
+      account_name: account.account_name || '',
+      balance: account.balance.toString(),
+      credit_limit: account.credit_limit ? account.credit_limit.toString() : '',
+      interest_rate: account.interest_rate ? account.interest_rate.toString() : '',
+    });
+    setShowModal(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingAccount(null);
+    setFormData({
+      account_type: 'checking',
+      institution_name: '',
+      account_name: '',
+      balance: '',
+      credit_limit: '',
+      interest_rate: '',
+    });
+    setShowModal(true);
   };
 
   const handleDelete = async (id) => {
@@ -92,7 +127,7 @@ const Accounts = () => {
           <p className="text-gray-600 mt-2">Manage your financial accounts</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={handleAddNew}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 font-medium"
         >
           + Add Account
@@ -120,12 +155,20 @@ const Accounts = () => {
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-4xl">{getAccountIcon(account.account_type)}</div>
-                  <button
-                    onClick={() => handleDelete(account.id)}
-                    className="text-red-600 hover:text-red-800 text-sm"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(account)}
+                      className="text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(account.id)}
+                      className="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-1">
                   {account.account_name || account.institution_name}
@@ -150,9 +193,9 @@ const Accounts = () => {
       {showModal && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => setShowModal(false)}></div>
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => { setShowModal(false); setEditingAccount(null); }}></div>
             <div className="relative bg-white rounded-lg max-w-lg w-full p-6">
-              <h2 className="text-2xl font-bold mb-4">Add New Account</h2>
+              <h2 className="text-2xl font-bold mb-4">{editingAccount ? 'Edit Account' : 'Add New Account'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Account Type</label>
@@ -218,7 +261,7 @@ const Accounts = () => {
                 <div className="flex space-x-4 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => { setShowModal(false); setEditingAccount(null); }}
                     className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
                   >
                     Cancel
@@ -227,7 +270,7 @@ const Accounts = () => {
                     type="submit"
                     className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
                   >
-                    Add Account
+                    {editingAccount ? 'Update Account' : 'Add Account'}
                   </button>
                 </div>
               </form>

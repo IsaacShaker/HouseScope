@@ -79,6 +79,20 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     )
     
     db.add(new_user)
+    db.flush()  # Get user ID without committing
+    
+    # Create default categories for new user
+    from app.models.category import Category
+    default_categories = [
+        "income", "salary", "groceries", "rent", "mortgage", 
+        "utilities", "transportation", "gas", "dining", "entertainment",
+        "healthcare", "insurance", "shopping", "personal", "other"
+    ]
+    category_objects = [
+        Category(user_id=new_user.id, name=cat) for cat in default_categories
+    ]
+    db.add_all(category_objects)
+    
     db.commit()
     db.refresh(new_user)
     
