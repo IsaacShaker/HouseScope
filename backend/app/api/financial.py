@@ -53,7 +53,7 @@ def get_financial_dashboard(
     emergency_buffer = calculator.calculate_emergency_buffer(current_user.id, monthly_expenses)
     dti_ratio = calculator.calculate_dti_ratio(current_user.id, monthly_income)
     
-    expense_breakdown_list = calculator.get_expense_breakdown(current_user.id)
+    expense_breakdown_list = calculator.get_expense_breakdown(current_user.id, months=1)
     income_breakdown_list = calculator.get_income_breakdown(current_user.id)
     
     expense_breakdown = {item["category"]: item["amount"] for item in expense_breakdown_list}

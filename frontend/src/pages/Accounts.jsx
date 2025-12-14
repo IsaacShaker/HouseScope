@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import accountService from '../services/accountService';
-import { Building2, PiggyBank, CreditCard, FileText, TrendingUp, Briefcase } from 'lucide-react';
+import { Building2, PiggyBank, CreditCard, FileText, TrendingUp, Briefcase, Pencil, Trash2 } from 'lucide-react';
 
 const Accounts = () => {
   const [accounts, setAccounts] = useState([]);
@@ -161,15 +161,17 @@ const Accounts = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(account)}
-                      className="text-blue-600 hover:text-blue-800 text-sm"
+                      className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
+                      title="Edit account"
                     >
-                      Edit
+                      <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(account.id)}
-                      className="text-red-600 hover:text-red-800 text-sm"
+                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors"
+                      title="Delete account"
                     >
-                      Delete
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
